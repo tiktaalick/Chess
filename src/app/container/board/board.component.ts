@@ -1,5 +1,6 @@
+import { GameService } from './../services/game.service';
 import { Component, OnInit } from '@angular/core';
-import { Coordinates } from '../../interfaces/coordinates';
+import { Coordinates } from '../interfaces/coordinates';
 
 @Component({
   selector: 'app-board',
@@ -7,6 +8,7 @@ import { Coordinates } from '../../interfaces/coordinates';
   styleUrls: ['./board.component.scss']
 })
 export class BoardComponent implements OnInit {
+  knightPosition$ = this.game.knightPosition$;
   sixtyFour = new Array(64)
     .fill(0)
     .map((_,i) => i);
@@ -17,7 +19,7 @@ export class BoardComponent implements OnInit {
     }
   }
   
-  constructor() { }
+constructor(private game: GameService) { }  
 
   ngOnInit() {
   }
@@ -26,4 +28,8 @@ export class BoardComponent implements OnInit {
       return (x + y) % 2 === 1;
   }
 
+handleSquareClick(pos: Coordinates) {
+    if (this.game.canMoveKnight(pos)) {
+        this.game.moveKnight(pos);
+    }}
 }

@@ -1,0 +1,11 @@
+<div class="board">
+    <ng-container *ngIf="knightPosition$|async as kp">
+        <div *ngFor="let i of sixtyFour">
+            <app-square *ngIf="xy(i) as pos" [black]="isBlack(pos)" (click)="handleSquareClick(pos)">
+                <app-knight *ngIf="pos.x === kp.x && pos.y === kp.y">
+
+                </app-knight>
+            </app-square>
+        </div>
+    </ng-container>
+</div>

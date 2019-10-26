@@ -1,7 +1,0 @@
-<div class="board">
-    <div *ngFor="let i of sixtyFour">
-        <app-square *ngIf="xy(i) as pos" [black]="isBlack(pos)">
-            <app-knight *ngIf="pos.x === 0 && pos.y === 0"></app-knight>
-        </app-square>
-    </div>
-</div>
