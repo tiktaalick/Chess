@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { SkyhookDndService } from "@angular-skyhook/core";
 import { ItemTypes } from '../constants';
 
 @Component({
@@ -8,16 +7,16 @@ import { ItemTypes } from '../constants';
   styleUrls: ['./knight.component.scss']
 })
 export class KnightComponent implements OnInit, OnDestroy {
-    knightSource = this.dnd.dragSource(ItemTypes.KNIGHT, {
-        beginDrag: () => ({})
-    });
+    // knightSource = this.dnd.dragSource(ItemTypes.KNIGHT, {
+    //     beginDrag: () => ({})
+    // });
   
-    constructor(private dnd: SkyhookDndService) { }
+    constructor() { }
 
   ngOnInit() {
   }
 
   ngOnDestroy() {
-    this.knightSource.unsubscribe();
+    // this.knightSource.unsubscribe();
   }
 }

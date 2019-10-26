@@ -1,5 +1,4 @@
 import { Component } from '@angular/core';
-import { SkyhookDndService } from '@angular-skyhook/core';
 
 @Component({
   selector: 'app-root',

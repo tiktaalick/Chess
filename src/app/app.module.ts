@@ -1,3 +1,4 @@
+import { SkyhookDndService } from '@angular-skyhook/core';
 import { AppComponent } from './app.component';
 import { ContainerComponent } from './container/container.component';
 import { BoardComponent } from './container/board/board.component';
