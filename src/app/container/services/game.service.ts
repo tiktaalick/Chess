@@ -6,7 +6,7 @@ import { BehaviorSubject } from 'rxjs';
   providedIn: 'root'
 })
 export class GameService {
-  knightPosition$ = new BehaviorSubject<Coordinates>({ x: 1, y: 7 });
+  knightPosition$ = new BehaviorSubject<Coordinates>({ x: 1, y: 0 });
   currentPosition: Coordinates;
 
     constructor() {
