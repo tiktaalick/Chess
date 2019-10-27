@@ -1,10 +1,14 @@
 <ng-container *ngIf="knightPosition$|async as kp">
     <div class="board">
         <!-- cdkDropList (cdkDropListDropped)="onDrop($event, coordinates(field), field)" -->
-        <div *ngFor="let field of fields" cdkDrag cdkDragBoundary=".board" (cdkDragEnded)="onDragEnded($event)">
-            <app-square [black]="isBlack(coordinates(field))">
-                <app-knight *ngIf="coordinates(field).x === kp.x && coordinates(field).y === kp.y">
-                </app-knight>
+        <div *ngFor="let field of fields">
+            <app-square [black]=" isBlack(coordinates(field))">
+                <div cdkDrag cdkDragBoundary=".board" (cdkDragEnded)="onDragEnded($event) ">
+                    <app-knight cdkDragHandle cdkDragPosition="cdkDragPosition"
+                        *ngIf=" coordinates(field).x===kp.x && coordinates(field).y===kp.y">
+
+                    </app-knight>
+                </div>
             </app-square>
         </div>
     </div>

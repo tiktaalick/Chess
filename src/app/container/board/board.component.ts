@@ -1,7 +1,7 @@
 import { GameService } from './../services/game.service';
 import { Component, OnInit } from '@angular/core';
 import { Coordinates } from '../interfaces/coordinates';
-import { CdkDragDrop, moveItemInArray, CdkDrag } from '@angular/cdk/drag-drop';
+import { CdkDragDrop, moveItemInArray, CdkDrag, CdkDragEnd } from '@angular/cdk/drag-drop';
 
 @Component({
   selector: 'app-board',
@@ -46,10 +46,16 @@ onDragEnded(event) {
   let boundingClientRect = element.getBoundingClientRect();
   let newPosition: Coordinates = ({ x: Math.floor(boundingClientRect.x / 70), y: Math.floor(boundingClientRect.y / 70) });
   if (this.game.canMoveKnight(newPosition)) {
-      this.game.moveKnight(newPosition);
+    console.log('...moving knight...');  
+    this.game.moveKnight(newPosition);
+  } else {
+    console.log('...invalid move!');
+    event.source.reset();
+    //this.dragPosition = this.getPosition(element);
+    // event.source.element.nativeElement.style.transform = 'none'; // visually reset element to its origin
+    // const source: any = event.source;
+    // source._passiveTransform = { x: 0, y: 0 } // make it so new drag starts from same origin
   }
-
-  this.dragPosition = this.getPosition(element);
   
 }
 

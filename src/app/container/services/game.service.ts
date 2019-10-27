@@ -24,6 +24,8 @@ canMoveKnight(to: Coordinates) {
         const dx = to.x - x;
         const dy = to.y - y;
 
+        console.log('Trying to move from ('+x+','+y+') to ('+to.x+','+to.y+')...')
+
         return (Math.abs(dx) === 2 && Math.abs(dy) === 1) ||
                (Math.abs(dx) === 1 && Math.abs(dy) === 2);
     }  
