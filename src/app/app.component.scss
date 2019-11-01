@@ -69,7 +69,7 @@
     fill: #888;
   }
 
-  .card-container {
+  .card-game {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
@@ -92,7 +92,7 @@
     line-height: 24px;
   }
 
-  .card-container .card:not(:last-child) {
+  .card-game .card:not(:last-child) {
     margin-right: 0;
   }
 
@@ -101,16 +101,16 @@
     width: 105px;
   }
 
-  .card-container .card:not(.highlight-card) {
+  .card-game .card:not(.highlight-card) {
     cursor: pointer;
   }
 
-  .card-container .card:not(.highlight-card):hover {
+  .card-game .card:not(.highlight-card):hover {
     transform: translateY(-3px);
     box-shadow: 0 4px 17px rgba(black, 0.35);
   }
 
-  .card-container .card:not(.highlight-card):hover .material-icons path {
+  .card-game .card:not(.highlight-card):hover .material-icons path {
     fill: rgb(105, 103, 103);
   }
 
@@ -257,7 +257,7 @@
   /* Responsive Styles */
   @media screen and (max-width: 767px) {
 
-    .card-container > *:not(.circle-link) ,
+    .card-game > *:not(.circle-link) ,
     .terminal {
       width: 100%;
     }

@@ -1,5 +1,4 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { ItemTypes } from '../constants';
 
 @Component({
   selector: 'app-knight',
@@ -7,16 +6,13 @@ import { ItemTypes } from '../constants';
   styleUrls: ['./knight.component.scss']
 })
 export class KnightComponent implements OnInit, OnDestroy {
-    // knightSource = this.dnd.dragSource(ItemTypes.KNIGHT, {
-    //     beginDrag: () => ({})
-    // });
   
-    constructor() { }
+  constructor() { }
 
   ngOnInit() {
   }
 
   ngOnDestroy() {
-    // this.knightSource.unsubscribe();
   }
+
 }

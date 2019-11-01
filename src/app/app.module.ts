@@ -1,10 +1,9 @@
-import { SkyhookDndService } from '@angular-skyhook/core';
 import { AppComponent } from './app.component';
-import { ContainerComponent } from './container/container.component';
-import { BoardComponent } from './container/board/board.component';
-import { SquareComponent } from './container/board/square/square.component';
-import { KnightComponent } from './container/knight/knight.component';
-import { GameService } from './container/services/game.service';
+import { GameComponent } from './game/game.component';
+import { BoardComponent } from './game/board/board.component';
+import { SquareComponent } from './game/board/square/square.component';
+import { KnightComponent } from './game/knight/knight.component';
+import { GameService } from './game/services/game.service';
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -16,7 +15,7 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     KnightComponent,
     SquareComponent,
     BoardComponent,
-    ContainerComponent
+    GameComponent
   ],
   imports: [
     BrowserModule,
