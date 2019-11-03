@@ -52,6 +52,16 @@ constructor(private game: GameService) { }
     return chessPiece && chessPiece.isBlack ? true : false;
   }
 
+  onDragMoved(event) {
+    let element = event.source.getRootElement();
+    let boundingClientRect = element.getBoundingClientRect();
+    let newPosition: Coordinates = ({ x: Math.floor(boundingClientRect.x / TILE_SIZE), y: Math.floor(boundingClientRect.y / TILE_SIZE) });
+    if (newPosition.x != this.dragPosition.x || newPosition.y != this.dragPosition.y) {
+      console.log("Dragging: ("+newPosition.x+","+newPosition.y+")");
+      this.dragPosition = newPosition;
+    }
+  }
+
   onDragEnded(event, field: number) {
     const chessPiece: ChessPiece = this.getChessPiece(field);
 
