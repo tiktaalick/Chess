@@ -42,8 +42,10 @@ export class GameService {
 
   canMoveKnight(movingChessPiece: ChessPiece, from: Coordinates, to: Coordinates) {
     console.log('Is this knight performing a correct move?');
-    let movingChessPieces = this.chessPieces;
-    const index: number = movingChessPieces.indexOf(movingChessPiece);
+
+    if (to.x >= 8 || to.y >= 8) {
+      return false;
+    }
     
     const dx = to.x - from.x;
     const dy = to.y - from.y;
