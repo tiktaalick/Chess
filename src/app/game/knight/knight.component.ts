@@ -1,4 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { TILE_SIZE } from './../constants';
+import { Component, OnInit, OnDestroy, Input } from '@angular/core';
 
 @Component({
   selector: 'app-knight',
@@ -6,6 +7,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
   styleUrls: ['./knight.component.scss']
 })
 export class KnightComponent implements OnInit, OnDestroy {
+  @Input() isBlack: boolean;
   
   constructor() { }
 
@@ -15,4 +17,11 @@ export class KnightComponent implements OnInit, OnDestroy {
   ngOnDestroy() {
   }
 
+  getSource(): string {
+    return this.isBlack ? "assets/images/black_knight.png" : "assets/images/white_knight.png";
+  }
+
+  getImageSize(): number {
+    return TILE_SIZE;
+  }
 }

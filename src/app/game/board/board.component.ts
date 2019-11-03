@@ -30,48 +30,53 @@ constructor(private game: GameService) { }
       return (this.coordinates(field).x + this.coordinates(field).y) % 2 === 1;
   }
 
-  hasAKnight(field: number) {
+  getChessPiece(field: number): ChessPiece {
     const fieldX = this.coordinates(field).x;
     const fieldY = this.coordinates(field).y;
-    const chessPiece: ChessPiece = this.game.chessPieces.find(
+
+    return this.game.chessPieces.find(
       cp => 
-      cp.type == ChessPieceType.KNIGHT &&
       cp.coordinates.x == fieldX && 
-      cp.coordinates.y == fieldY);
-    return chessPiece ? true : false;
-  }
-
-onDragEnded(event, field: number) {
-  const fieldX = this.coordinates(field).x;
-  const fieldY = this.coordinates(field).y;
-  const chessPiece: ChessPiece = this.game.chessPieces.find(
-    cp => 
-    cp.coordinates.x == fieldX && 
-    cp.coordinates.y == fieldY);
-
-  let element = event.source.getRootElement();
-  let boundingClientRect = element.getBoundingClientRect();
-  let oldPosition: Coordinates = chessPiece.coordinates;
-  let newPosition: Coordinates = ({ x: Math.floor(boundingClientRect.x / TILE_SIZE), y: Math.floor(boundingClientRect.y / TILE_SIZE) });
-
-  if (this.game.canMoveKnight(chessPiece, oldPosition, newPosition)) {
-    console.log('...moving knight...');  
-    this.game.moveChessPiece(chessPiece, newPosition);
-  } else {
-    console.log('...invalid move!');
-    event.source.reset();
+      cp.coordinates.y == fieldY);    
   }
   
-}
+  hasAKnight(field: number) {
+    const chessPiece: ChessPiece = this.getChessPiece(field);
 
-getPosition(el) {
-  let x = 0;
-  let y = 0;
-  while(el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
-    x += el.offsetLeft - el.scrollLeft;
-    y += el.offsetTop - el.scrollTop;
-    el = el.offsetParent;
+    return chessPiece && chessPiece.type == ChessPieceType.KNIGHT ? true : false;
   }
-  return { x: x, y: y };
-}
+
+  isBlack(field: number) {
+    const chessPiece: ChessPiece = this.getChessPiece(field);
+
+    return chessPiece && chessPiece.isBlack ? true : false;
+  }
+
+  onDragEnded(event, field: number) {
+    const chessPiece: ChessPiece = this.getChessPiece(field);
+
+    let element = event.source.getRootElement();
+    let boundingClientRect = element.getBoundingClientRect();
+    let oldPosition: Coordinates = chessPiece.coordinates;
+    let newPosition: Coordinates = ({ x: Math.floor(boundingClientRect.x / TILE_SIZE), y: Math.floor(boundingClientRect.y / TILE_SIZE) });
+
+    if (this.game.canMoveKnight(chessPiece, oldPosition, newPosition)) {
+      console.log('...moving knight...');  
+      this.game.moveChessPiece(chessPiece, newPosition);
+    } else {
+      console.log('...invalid move!');
+      event.source.reset();
+    }  
+  }
+
+  getPosition(el) {
+    let x = 0;
+    let y = 0;
+    while(el && !isNaN(el.offsetLeft) && !isNaN(el.offsetTop)) {
+      x += el.offsetLeft - el.scrollLeft;
+      y += el.offsetTop - el.scrollTop;
+      el = el.offsetParent;
+    }
+    return { x: x, y: y };
+  }
 }

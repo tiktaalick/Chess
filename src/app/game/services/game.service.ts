@@ -22,8 +22,10 @@ export class GameService {
   initializeChessPieces$(): BehaviorSubject<ChessPiece[]> {
     console.log('Initializing chess pieces');
     var chessPieces: ChessPiece[] = [];
-    chessPieces.push({id: 1,type: ChessPieceType.KNIGHT, isBlack: true,coordinates: {x: 0,y: 1}});
-    chessPieces.push({id: 2,type: ChessPieceType.KNIGHT, isBlack: true,coordinates: {x: 0,y: 6}});
+    chessPieces.push({id: 1,type: ChessPieceType.KNIGHT, isBlack: true,coordinates: {x: 1,y: 0}});
+    chessPieces.push({id: 2,type: ChessPieceType.KNIGHT, isBlack: true,coordinates: {x: 6,y: 0}});
+    chessPieces.push({id: 3,type: ChessPieceType.KNIGHT, isBlack: false,coordinates: {x: 1,y: 7}});
+    chessPieces.push({id: 4,type: ChessPieceType.KNIGHT, isBlack: false,coordinates: {x: 6,y: 7}});
 
     return new BehaviorSubject<ChessPiece[]>(chessPieces);
   }

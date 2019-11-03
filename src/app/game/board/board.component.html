@@ -1,8 +1,8 @@
 <div class="board">
     <div *ngFor="let field of fields">
-        <app-square [darkerTile]=" isDarkerTile(field)">
+        <app-square [darkerTile]="isDarkerTile(field)">
             <div cdkDrag cdkDragBoundary=".board" (cdkDragEnded)="onDragEnded($event, field) ">
-                <app-knight cdkDragHandle cdkDragPosition="cdkDragPosition" *ngIf="hasAKnight(field)">
+                <app-knight cdkDragHandle cdkDragPosition="cdkDragPosition" *ngIf="hasAKnight(field)" [isBlack]=isBlack(field)>
 
                 </app-knight>
             </div>
