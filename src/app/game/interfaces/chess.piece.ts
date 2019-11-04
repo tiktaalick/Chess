@@ -3,5 +3,6 @@ export interface ChessPiece {
   id: number;
   type: string;
   isBlack: boolean; 
-  coordinates: Coordinates;
+  from: Coordinates;
+  to: Coordinates;
 }
