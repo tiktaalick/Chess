@@ -90,14 +90,23 @@ export class GameService {
      return (newPosition.x != dragPosition.x || newPosition.y != dragPosition.y);
   }
 
-  moveChessPiece(movingChessPiece: ChessPiece) { 
-    const movingChessPieces = this.chessPieces;
-    const index: number = movingChessPieces.indexOf(movingChessPiece);
-    
-    movingChessPiece.from = movingChessPiece.to;
-    movingChessPieces[index] = movingChessPiece;
+  removeChessPiece(chessPieceToBeRemoved: ChessPiece) { 
+    const index: number = this.chessPieces.indexOf(chessPieceToBeRemoved);
+    if (index >= 0) {
+      this.chessPieces.splice(index,1);
+      this.chessPieces$.next(this.chessPieces);
+    }
+  }
 
-    this.chessPieces$.next(movingChessPieces);
+  moveChessPiece(movingChessPiece: ChessPiece) { 
+    const chessPieceToBeRemoved: ChessPiece = this.getChessPiece(this.field(movingChessPiece.to.x,movingChessPiece.to.y));    
+    this.removeChessPiece(chessPieceToBeRemoved)
+    
+    const index: number = this.chessPieces.indexOf(movingChessPiece);    
+    movingChessPiece.from = movingChessPiece.to;
+    this.chessPieces[index] = movingChessPiece;
+    this.chessPieces$.next(this.chessPieces);
+
     this.resetValidMove(this.dragPosition);
     this.isBlackMove$.next(!this.isBlackMove$.getValue());
   }
