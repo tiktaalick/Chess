@@ -1,22 +1,22 @@
+import { MoveService } from './../services/move.service';
 import { Field } from './../interfaces/field';
 import { ChessPiece } from './../interfaces/chess.piece';
 import { ChessPieceType } from './../constants';
 import { GameService } from '../services/game.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 
 @Component({
   selector: 'app-board',
   templateUrl: './board.component.html',
   styleUrls: ['./board.component.scss']
 })
-export class BoardComponent implements OnInit {
-  chessPieces$ = this.gameService.chessPieces$;
-  validMove$ = this.gameService.validMove$;
-  resetMove$ = this.gameService.resetMove$;
+export class BoardComponent implements OnDestroy{
+  private validMove$ = this.move.validMove$;
+  private resetMove$ = this.move.resetMove$;
   
-  fields: Field[] = this.createFieldArray();
+  public fields: Field[] = this.createFieldArray();
   
-  constructor(private gameService: GameService) { 
+  constructor(private game: GameService, private move: MoveService) { 
     this.validMove$.subscribe(move => {
       if(this.fields[move]) {
         this.fields[move].isValidMove = true;
@@ -30,10 +30,12 @@ export class BoardComponent implements OnInit {
     });
   }  
 
-  ngOnInit() {
+  ngOnDestroy(): void {
+    this.validMove$.unsubscribe();
+    this.resetMove$.unsubscribe();
   }
 
-  createFieldArray(): Field[] {
+  private createFieldArray(): Field[] {
     var fields = [];
     for (let i = 0; i < 64; i++) {
       const field: Field = {
@@ -45,47 +47,47 @@ export class BoardComponent implements OnInit {
     return fields;
   }
 
-  getX(field: number): number {
-    return this.gameService.coordinates(field).x;
+  public getX(field: number): number {
+    return this.game.coordinates(field).x;
   }
   
-  getY(field: number): number {
-    return this.gameService.coordinates(field).y;
+  public getY(field: number): number {
+    return this.game.coordinates(field).y;
   }
 
-  isDarkerTile(field: number): boolean {
-    return (this.gameService.coordinates(field).x + this.gameService.coordinates(field).y) % 2 === 1;
+  public isDarkerTile(field: number): boolean {
+    return (this.game.coordinates(field).x + this.game.coordinates(field).y) % 2 === 1;
   }
 
-  hasAKnight(field: number): boolean {
-    return this.gameService.hasAChessPieceOfType(field, ChessPieceType.KNIGHT);
+  public hasAKnight(field: number): boolean {
+    return this.game.hasAChessPieceOfType(field, ChessPieceType.KNIGHT);
   }
 
-  isDragDisabled(field: number) {
-    const chessPiece: ChessPiece = this.gameService.getChessPiece(field);
+  public isDragDisabled(field: number) {
+    const chessPiece: ChessPiece = this.game.getChessPiece(field);
 
     return chessPiece && chessPiece.myTurn ? false : true;
   }
 
-  isChessPieceBlack(field: number) {
-    const chessPiece: ChessPiece = this.gameService.getChessPiece(field);
+  public isChessPieceBlack(field: number) {
+    const chessPiece: ChessPiece = this.game.getChessPiece(field);
 
     return chessPiece && chessPiece.isBlack ? true : false;
   }
 
-  onDragMoved(event: any, field: number) {
-    const movingChessPiece: ChessPiece = this.gameService.isMoveAllowed(event, field, true);
+  public onDragMoved(event: any, field: number) {
+    const movingChessPiece: ChessPiece = this.move.isMoveAllowed(event, field, true);
 
     if(movingChessPiece) {
-      this.gameService.showValidMove(movingChessPiece.to);
+      this.move.showValidMove(movingChessPiece.to);
     }  
   }
 
-  onDragEnded(event: any, field: number) {
-    const movingChessPiece: ChessPiece = this.gameService.isMoveAllowed(event, field, false);
+  public onDragEnded(event: any, field: number) {
+    const movingChessPiece: ChessPiece = this.move.isMoveAllowed(event, field, false);
 
     if(movingChessPiece) {
-      this.gameService.moveChessPiece(movingChessPiece);      
+      this.move.moveChessPiece(movingChessPiece);      
     } 
     
     event.source.reset();

@@ -6,7 +6,7 @@ import { Component, OnInit, Input } from '@angular/core';
   templateUrl: './square.component.html',
   styleUrls: ['./square.component.scss']
 })
-export class SquareComponent implements OnInit {
+export class SquareComponent {
   @Input() darkerTile: boolean;
   @Input() isValidMove: boolean;
   @Input() field: number;
@@ -15,10 +15,7 @@ export class SquareComponent implements OnInit {
 
   constructor() { }
 
-  ngOnInit() {
-  }
-
-  getStyle() {
+  public getStyle() {
     const standard = this.darkerTile
         ? { backgroundColor: "rgb("+DarkerTile.RED+","+DarkerTile.GREEN+","+DarkerTile.BLUE+")" }
         : { backgroundColor: "rgb("+LighterTile.RED+","+LighterTile.GREEN+","+LighterTile.BLUE+")" };
