@@ -1,23 +1,30 @@
 import { Coordinates } from '../interfaces/coordinates';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, from } from 'rxjs';
 import { ChessPiece } from '../interfaces/chess.piece';
-import { ChessPieceType, TILE_SIZE } from '../constants';
+import { ChessPieceType, TILE_SIZE} from '../constants';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService {
   chessPieces$: BehaviorSubject<ChessPiece[]> = this.initializeChessPieces$();
+  validMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
+  resetMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
   chessPieces: ChessPiece[];
-  dragPosition = {x: 0, y: 0};
-
-  coordinates(i): Coordinates {
+  dragPosition: Coordinates = {x: 0, y: 0};
+  
+  coordinates(i: number): Coordinates {
     return {
       x: i % 8,
       y: Math.floor(i / 8)
     }
   }
+
+  field(x: number, y: number): number {
+    return x + 8 * y;
+  }
+
 
   constructor() {
       this.chessPieces$.subscribe(chessPieces => {
@@ -48,12 +55,24 @@ export class GameService {
   initializeChessPieces$(): BehaviorSubject<ChessPiece[]> {
     const chessPieces: ChessPiece[] = [];
     
-    chessPieces.push({id: 1,type: ChessPieceType.KNIGHT, isBlack: true, from: {x: 1,y: 0}, to: null});
-    chessPieces.push({id: 2,type: ChessPieceType.KNIGHT, isBlack: true, from: {x: 6,y: 0}, to: null});
-    chessPieces.push({id: 3,type: ChessPieceType.KNIGHT, isBlack: false, from: {x: 1,y: 7}, to: null});
-    chessPieces.push({id: 4,type: ChessPieceType.KNIGHT, isBlack: false, from: {x: 6,y: 7}, to: null});
+    chessPieces.push(this.createChessPiece(1, ChessPieceType.KNIGHT, true, {x: 1, y: 0}));
+    chessPieces.push(this.createChessPiece(2, ChessPieceType.KNIGHT, true, {x: 6, y: 0}));
+    chessPieces.push(this.createChessPiece(3, ChessPieceType.KNIGHT, false, {x: 1, y: 7}));
+    chessPieces.push(this.createChessPiece(4, ChessPieceType.KNIGHT, false, {x: 6, y: 7}));
 
     return new BehaviorSubject<ChessPiece[]>(chessPieces);
+  }
+
+  createChessPiece(id: number, type: string, isBlack: boolean, coordinates): ChessPiece {
+    const chessPiece: ChessPiece = {
+      id: id,
+      type: type,
+      isBlack: isBlack,
+      from: {x: coordinates.x, y: coordinates.y},
+      to: {x: coordinates.x, y: coordinates.y}
+    }; 
+
+    return chessPiece;
   }
 
   hasAChessPieceOfType(field: number, type: string): boolean {
@@ -74,6 +93,7 @@ export class GameService {
     movingChessPieces[index] = movingChessPiece;
 
     this.chessPieces$.next(movingChessPieces);
+    this.resetValidMove(this.dragPosition);
   }
 
   canMoveKnight(movingChessPiece: ChessPiece) {
@@ -95,7 +115,8 @@ export class GameService {
     let checkIfAllowed: boolean = false;
 
     if (isMoving && hasMovedToAnotherField) {
-      this.dragPosition = chessPiece.to;
+      this.resetValidMove(this.dragPosition);
+      this.dragPosition = { x: chessPiece.to.x, y: chessPiece.to.y };
       checkIfAllowed = true;
     } else if (!isMoving) {
       checkIfAllowed = true;
@@ -108,4 +129,11 @@ export class GameService {
     }  
   }
   
+  showValidMove(coordinates: Coordinates) {
+    this.validMove$.next(this.field(coordinates.x,coordinates.y));
+  }
+
+  resetValidMove(coordinates: Coordinates) {
+    this.resetMove$.next(this.field(coordinates.x,coordinates.y));
+  }
 }

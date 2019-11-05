@@ -8,6 +8,10 @@ import { Component, OnInit, Input } from '@angular/core';
 })
 export class SquareComponent implements OnInit {
   @Input() darkerTile: boolean;
+  @Input() isValidMove: boolean;
+  @Input() field: number;
+  @Input() x: number;
+  @Input() y: number;
 
   constructor() { }
 
@@ -15,8 +19,14 @@ export class SquareComponent implements OnInit {
   }
 
   getStyle() {
-    return this.darkerTile
+    const standard = this.darkerTile
         ? { backgroundColor: "rgb("+DarkerTile.RED+","+DarkerTile.GREEN+","+DarkerTile.BLUE+")" }
-        : { backgroundColor: "rgb("+LighterTile.RED+","+LighterTile.GREEN+","+LighterTile.BLUE+")" }
+        : { backgroundColor: "rgb("+LighterTile.RED+","+LighterTile.GREEN+","+LighterTile.BLUE+")" };
+
+    const style = this.isValidMove
+        ? { backgroundColor: "rgb("+DarkerTile.RED+",255,"+DarkerTile.BLUE+")" }
+        : standard;
+
+    return style;
   }
 }

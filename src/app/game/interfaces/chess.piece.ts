@@ -1,4 +1,4 @@
-import { Coordinates } from './../../game/interfaces/coordinates';
+import { Coordinates } from './coordinates';
 export interface ChessPiece {
   id: number;
   type: string;

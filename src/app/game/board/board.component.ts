@@ -1,8 +1,8 @@
+import { Field } from './../interfaces/field';
 import { ChessPiece } from './../interfaces/chess.piece';
-import { ChessPieceType, TILE_SIZE } from './../constants';
+import { ChessPieceType } from './../constants';
 import { GameService } from '../services/game.service';
 import { Component, OnInit } from '@angular/core';
-import { Coordinates } from '../interfaces/coordinates';
 
 @Component({
   selector: 'app-board',
@@ -10,45 +10,78 @@ import { Coordinates } from '../interfaces/coordinates';
   styleUrls: ['./board.component.scss']
 })
 export class BoardComponent implements OnInit {
-  chessPieces$ = this.game.chessPieces$;
-  fields: number[] = new Array(64).fill(0).map((_,i) => i);
+  chessPieces$ = this.gameService.chessPieces$;
+  validMove$ = this.gameService.validMove$;
+  resetMove$ = this.gameService.resetMove$;
   
-  constructor(private game: GameService) { }  
+  fields: Field[] = this.createFieldArray();
+  
+  constructor(private gameService: GameService) { 
+    this.validMove$.subscribe(move => {
+      if(this.fields[move]) {
+        this.fields[move].isValidMove = true;
+      }  
+    });
+
+    this.resetMove$.subscribe(move => {
+      if(this.fields[move]) {
+        this.fields[move].isValidMove = false;
+      }  
+    });
+  }  
 
   ngOnInit() {
   }
 
+  createFieldArray(): Field[] {
+    var fields = [];
+    for (let i = 0; i < 64; i++) {
+      const field: Field = {
+        number: i,
+        isValidMove: false
+      };
+      fields.push(field);
+    }    
+    return fields;
+  }
+
+  getX(field: number): number {
+    return this.gameService.coordinates(field).x;
+  }
+  
+  getY(field: number): number {
+    return this.gameService.coordinates(field).y;
+  }
+
   isDarkerTile(field: number): boolean {
-    return (this.game.coordinates(field).x + this.game.coordinates(field).y) % 2 === 1;
+    return (this.gameService.coordinates(field).x + this.gameService.coordinates(field).y) % 2 === 1;
   }
 
   hasAKnight(field: number): boolean {
-    return this.game.hasAChessPieceOfType(field, ChessPieceType.KNIGHT);
+    return this.gameService.hasAChessPieceOfType(field, ChessPieceType.KNIGHT);
   }
 
   isChessPieceBlack(field: number) {
-    const chessPiece: ChessPiece = this.game.getChessPiece(field);
+    const chessPiece: ChessPiece = this.gameService.getChessPiece(field);
 
     return chessPiece && chessPiece.isBlack ? true : false;
   }
 
   onDragMoved(event: any, field: number) {
-    const movingChessPiece: ChessPiece = this.game.isMoveAllowed(event, field, true);
+    const movingChessPiece: ChessPiece = this.gameService.isMoveAllowed(event, field, true);
 
     if(movingChessPiece) {
-      console.log('Moving knight is allowed');  
+      this.gameService.showValidMove(movingChessPiece.to);
     }  
   }
 
   onDragEnded(event: any, field: number) {
-    const movingChessPiece: ChessPiece = this.game.isMoveAllowed(event, field, false);
+    const movingChessPiece: ChessPiece = this.gameService.isMoveAllowed(event, field, false);
 
     if(movingChessPiece) {
-      console.log('...moving knight...');  
-      this.game.moveChessPiece(movingChessPiece);
-    } else {
-      console.log('...invalid move!');
-      event.source.reset();
-    }  
+      this.gameService.moveChessPiece(movingChessPiece);      
+    } 
+    
+    event.source.reset();
   }
 }
