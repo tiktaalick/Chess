@@ -61,6 +61,12 @@ export class BoardComponent implements OnInit {
     return this.gameService.hasAChessPieceOfType(field, ChessPieceType.KNIGHT);
   }
 
+  isDragDisabled(field: number) {
+    const chessPiece: ChessPiece = this.gameService.getChessPiece(field);
+
+    return chessPiece && chessPiece.myTurn ? false : true;
+  }
+
   isChessPieceBlack(field: number) {
     const chessPiece: ChessPiece = this.gameService.getChessPiece(field);
 

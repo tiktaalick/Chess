@@ -5,4 +5,5 @@ export interface ChessPiece {
   isBlack: boolean; 
   from: Coordinates;
   to: Coordinates;
+  myTurn: boolean;
 }

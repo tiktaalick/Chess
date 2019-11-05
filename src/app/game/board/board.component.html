@@ -2,8 +2,8 @@
     <div *ngFor="let field of fields">
         <app-square [field]="field.number" [x]="getX(field.number)" [y]="getY(field.number)"
             [darkerTile]="isDarkerTile(field.number)" [isValidMove]="field.isValidMove">
-            <div cdkDrag (cdkDragMoved)="onDragMoved($event, field.number)"
-                (cdkDragEnded)="onDragEnded($event, field.number)">
+            <div cdkDrag [cdkDragDisabled]="isDragDisabled(field.number)"
+                (cdkDragMoved)="onDragMoved($event, field.number)" (cdkDragEnded)="onDragEnded($event, field.number)">
                 <app-knight cdkDragHandle cdkDragPosition="cdkDragPosition" *ngIf="hasAKnight(field.number)"
                     [isBlack]=isChessPieceBlack(field.number)>
 

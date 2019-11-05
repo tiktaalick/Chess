@@ -1,6 +1,6 @@
 import { Coordinates } from '../interfaces/coordinates';
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, from } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { ChessPiece } from '../interfaces/chess.piece';
 import { ChessPieceType, TILE_SIZE} from '../constants';
 
@@ -11,6 +11,7 @@ export class GameService {
   chessPieces$: BehaviorSubject<ChessPiece[]> = this.initializeChessPieces$();
   validMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
   resetMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
+  isBlackMove$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   chessPieces: ChessPiece[];
   dragPosition: Coordinates = {x: 0, y: 0};
   
@@ -25,11 +26,16 @@ export class GameService {
     return x + 8 * y;
   }
 
-
   constructor() {
-      this.chessPieces$.subscribe(chessPieces => {
-        this.chessPieces = chessPieces;
+    this.chessPieces$.subscribe(chessPieces => {
+      this.chessPieces = chessPieces;
+    })
+
+    this.isBlackMove$.subscribe(isBlackMove => {
+      this.chessPieces.forEach(chessPiece => {
+        chessPiece.myTurn = chessPiece.isBlack == isBlackMove;
       })
+    })
   }
 
   getChessPiece(field: number): ChessPiece {
@@ -37,9 +43,7 @@ export class GameService {
     const fieldY = this.coordinates(field).y;
 
     return this.chessPieces.find(
-      cp => 
-      cp.from.x == fieldX && 
-      cp.from.y == fieldY);    
+      chessPiece => chessPiece.from.x == fieldX && chessPiece.from.y == fieldY);    
   }
 
   getNewPosition(event: any): Coordinates {
@@ -69,7 +73,8 @@ export class GameService {
       type: type,
       isBlack: isBlack,
       from: {x: coordinates.x, y: coordinates.y},
-      to: {x: coordinates.x, y: coordinates.y}
+      to: {x: coordinates.x, y: coordinates.y},
+      myTurn: false
     }; 
 
     return chessPiece;
@@ -94,6 +99,7 @@ export class GameService {
 
     this.chessPieces$.next(movingChessPieces);
     this.resetValidMove(this.dragPosition);
+    this.isBlackMove$.next(!this.isBlackMove$.getValue());
   }
 
   canMoveKnight(movingChessPiece: ChessPiece) {
