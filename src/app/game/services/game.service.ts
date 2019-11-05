@@ -126,6 +126,7 @@ export class GameService {
   isMoveAllowed(event: any, field: number, isMoving: boolean): ChessPiece {
     const chessPiece: ChessPiece = this.getChessPiece(field);
     chessPiece.to = this.getNewPosition(event);
+    const chessPieceToBeRemoved: ChessPiece = this.getChessPiece(this.field(chessPiece.to.x,chessPiece.to.y));    
     const hasMovedToAnotherField: boolean = this.hasMovedToAnotherField(this.dragPosition, chessPiece.to);
     let checkIfAllowed: boolean = false;
 
@@ -137,8 +138,10 @@ export class GameService {
       checkIfAllowed = true;
     }
 
-    if (checkIfAllowed && this.canMoveKnight(chessPiece)) {
-        return chessPiece;
+    if (checkIfAllowed && chessPieceToBeRemoved && chessPieceToBeRemoved.isBlack == chessPiece.isBlack) {
+      return null;
+    } else if (checkIfAllowed && this.canMoveKnight(chessPiece)) {
+      return chessPiece;
     } else {
       return null;
     }  
