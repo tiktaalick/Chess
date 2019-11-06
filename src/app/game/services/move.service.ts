@@ -116,13 +116,18 @@ export class MoveService implements OnDestroy {
       return false;
     } 
     
+    if (movingChessPiece.type === ChessPieceType.ROOK) {
+      return this.checkTheRulesForRook(movingChessPiece, horizontal, vertical);
+    } 
+
+    if (movingChessPiece.type === ChessPieceType.KNIGHT) {
+      return this.checkTheRulesForKnight(horizontal, vertical);
+    }
+
     if (movingChessPiece.type === ChessPieceType.QUEEN) {
       return this.checkTheRulesForQueen(movingChessPiece, horizontal, vertical);
     } 
     
-    if (movingChessPiece.type === ChessPieceType.KNIGHT) {
-      return this.checkTheRulesForKnight(horizontal, vertical);
-    }
   }  
 
   private mustIJump(movingChessPiece: ChessPiece, horizontal: number, vertical: number): boolean {   
@@ -146,6 +151,20 @@ export class MoveService implements OnDestroy {
     return false;
   }
 
+  private checkTheRulesForRook(rook: ChessPiece, horizontal: number, vertical: number): boolean {   
+    let isBesidesJumpingValid: boolean = (horizontal !== 0 && vertical === 0) ||
+                                         (horizontal === 0 && vertical !== 0);
+
+    let mustINotJump: boolean = !this.mustIJump(rook, horizontal, vertical);
+    
+    return isBesidesJumpingValid && mustINotJump ? true : false;
+  }  
+
+  private checkTheRulesForKnight(horizontal: number, vertical: number): boolean {    
+    return (Math.abs(horizontal) === 2 && Math.abs(vertical) === 1) ||
+           (Math.abs(horizontal) === 1 && Math.abs(vertical) === 2);
+  }  
+
   private checkTheRulesForQueen(queen: ChessPiece, horizontal: number, vertical: number): boolean {   
     let isBesidesJumpingValid: boolean = (horizontal !== 0 && vertical === 0) ||
                                          (horizontal === 0 && vertical !== 0) ||
@@ -157,8 +176,4 @@ export class MoveService implements OnDestroy {
     return isBesidesJumpingValid && mustINotJump ? true : false;
   }  
 
-  private checkTheRulesForKnight(horizontal: number, vertical: number): boolean {    
-    return (Math.abs(horizontal) === 2 && Math.abs(vertical) === 1) ||
-           (Math.abs(horizontal) === 1 && Math.abs(vertical) === 2);
-  }  
 }
