@@ -1,5 +1,6 @@
-import { Injectable, OnDestroy } from '@angular/core';
 import { ChessPiece, Coordinates } from '../interfaces';
+import { CastlingStatus } from './../constants';
+import { Injectable, OnDestroy } from '@angular/core';
 import { GameService } from './game.service';
 import { TILE_SIZE, ChessPieceType, EnPassantStatus } from '../constants';
 import { BehaviorSubject } from 'rxjs';
@@ -50,19 +51,73 @@ export class MoveService implements OnDestroy {
   }
 
   private handleEnPassant(movingChessPiece: ChessPiece): ChessPiece {
-    var chessPieceToBeRemovedEnPassent: ChessPiece = this.game.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ABOUT_TO_BE_KICKED_OFF);
+    let chessPieceToBeRemovedEnPassent: ChessPiece = this.game.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ABOUT_TO_BE_KICKED_OFF);
     this.removeChessPiece(chessPieceToBeRemovedEnPassent);
     
-    var resetEnPassent: ChessPiece = this.game.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ALLOWED);
+    let resetEnPassent: ChessPiece = this.game.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ALLOWED);
     if (resetEnPassent) {
       resetEnPassent.enPassantStatus = EnPassantStatus.NOT_ALLOWED;
-      console.log('('+resetEnPassent.from.x+','+resetEnPassent.from.y+'): enPassant='+resetEnPassent.enPassantStatus);
     }
 
     if (movingChessPiece.type === ChessPieceType.PAWN &&
         Math.abs(movingChessPiece.to.y - movingChessPiece.from.y) === 2) {
           movingChessPiece.enPassantStatus = EnPassantStatus.ALLOWED;
     } 
+    
+    return movingChessPiece;
+  }
+
+  private castleRook(king: ChessPiece, castleLeft: boolean) {
+    console.log('('+king.to.x+','+king.to.y+'): castling='+CastlingStatus.ABOUT_TO_CASTLE);
+    
+    let rookToCastle: ChessPiece = this.game.chessPieces.find(
+      chessPiece => chessPiece.type === ChessPieceType.ROOK && 
+                    chessPiece.isBlack === king.isBlack &&
+                    (castleLeft 
+                      ? chessPiece.castlingLeftStatus === CastlingStatus.ALLOWED 
+                      : chessPiece.castlingRightStatus === CastlingStatus.ALLOWED));      
+    rookToCastle.to.x = castleLeft ? rookToCastle.from.x + 3 : rookToCastle.from.x - 2;
+    this.moveChessPiece(rookToCastle);
+    this.isBlackMove$.next(!this.isBlackMove$.getValue());
+  }
+
+  private dontCastleKing(rookToCastle: ChessPiece, castleLeft: boolean) {
+    const index: number = this.game.chessPieces.findIndex(
+      chessPiece => chessPiece.type === ChessPieceType.KING && 
+                    chessPiece.isBlack === rookToCastle.isBlack); 
+    this.game.chessPieces[index].castlingLeftStatus = castleLeft 
+                    ? CastlingStatus.NOT_ALLOWED 
+                    : this.game.chessPieces[index].castlingLeftStatus;
+    this.game.chessPieces[index].castlingRightStatus = castleLeft 
+                    ? this.game.chessPieces[index].castlingRightStatus 
+                    : CastlingStatus.NOT_ALLOWED;
+    console.log('king.castlingLeftStatus='+this.game.chessPieces[index].castlingLeftStatus);
+    console.log('king.castlingRightStatus='+this.game.chessPieces[index].castlingRightStatus);
+  }
+
+  private handleCastling(movingChessPiece: ChessPiece): ChessPiece {
+    if (movingChessPiece.type === ChessPieceType.KING && movingChessPiece.castlingLeftStatus === CastlingStatus.ABOUT_TO_CASTLE) {
+      this.castleRook(movingChessPiece, true);
+    } 
+    
+    if (movingChessPiece.type === ChessPieceType.KING && movingChessPiece.castlingRightStatus === CastlingStatus.ABOUT_TO_CASTLE) {
+      this.castleRook(movingChessPiece, false);
+    }
+
+    if (movingChessPiece.type === ChessPieceType.ROOK && movingChessPiece.castlingLeftStatus === CastlingStatus.ALLOWED) {
+      this.dontCastleKing(movingChessPiece, true);
+    }
+
+    if (movingChessPiece.type === ChessPieceType.ROOK && movingChessPiece.castlingRightStatus === CastlingStatus.ALLOWED) {
+      this.dontCastleKing(movingChessPiece, false);
+    }
+
+    if([ChessPieceType.KING, ChessPieceType.ROOK].indexOf(movingChessPiece.type) > -1) {
+      movingChessPiece.castlingLeftStatus = CastlingStatus.NOT_ALLOWED;
+      movingChessPiece.castlingRightStatus = CastlingStatus.NOT_ALLOWED;
+      console.log('('+movingChessPiece.to.x+','+movingChessPiece.to.y+'): castlingLeftStatus='+movingChessPiece.castlingLeftStatus);
+      console.log('('+movingChessPiece.to.x+','+movingChessPiece.to.y+'): castlingRightStatus='+movingChessPiece.castlingRightStatus);
+    }     
     
     return movingChessPiece;
   }
@@ -77,10 +132,7 @@ export class MoveService implements OnDestroy {
 
   public moveChessPiece(movingChessPiece: ChessPiece) { 
     movingChessPiece = this.handleEnPassant(movingChessPiece);
-    if (movingChessPiece.type === ChessPieceType.PAWN) {
-      console.log('('+movingChessPiece.to.x+','+movingChessPiece.to.y+'): enPassant='+movingChessPiece.enPassantStatus);
-    }
-
+    movingChessPiece = this.handleCastling(movingChessPiece);
     movingChessPiece = this.promotePawn(movingChessPiece);
     
     const to: number = this.field(movingChessPiece.to.x,movingChessPiece.to.y);
@@ -165,7 +217,7 @@ export class MoveService implements OnDestroy {
     } 
     
     if (movingChessPiece.type === ChessPieceType.KING) {
-      return this.checkTheRulesForKing(horizontal, vertical);
+      return this.checkTheRulesForKing(movingChessPiece, horizontal, vertical);
     } 
 
     if (movingChessPiece.type === ChessPieceType.PAWN) {
@@ -225,10 +277,45 @@ export class MoveService implements OnDestroy {
     return isBesidesJumpingValid && !mustIJump ? true : false;
   }  
 
-  private checkTheRulesForKing(horizontal: number, vertical: number): boolean {    
-    return (Math.abs(horizontal) === 1 && Math.abs(vertical) === 0) ||
-           (Math.abs(horizontal) === 0 && Math.abs(vertical) === 1) ||  
-           (Math.abs(horizontal) === 1 && Math.abs(vertical) === 1);
+  private checkTheRulesForKing(king: ChessPiece, horizontal: number, vertical: number): boolean {    
+    console.log('castlingLeftStatus='+ king.castlingLeftStatus);
+    console.log('castlingRightStatus='+ king.castlingRightStatus);
+
+    const isValidBasicMove: boolean = (Math.abs(horizontal) === 1 && Math.abs(vertical) === 0) ||
+                                      (Math.abs(horizontal) === 0 && Math.abs(vertical) === 1) ||  
+                                      (Math.abs(horizontal) === 1 && Math.abs(vertical) === 1);
+    const mustIJump: boolean = this.mustIJump(king, horizontal, vertical);
+    const someoneBlockingRook: ChessPiece = this.game.getChessPiece(this.field(1,king.isBlack ? 0 : 7))
+
+    const isValidCastlingLeft: boolean = 
+      (king.castlingLeftStatus !== CastlingStatus.NOT_ALLOWED && !someoneBlockingRook && horizontal === -2);
+
+    const isValidCastlingRight: boolean = 
+      (king.castlingRightStatus !== CastlingStatus.NOT_ALLOWED && horizontal === 2); 
+
+    const verdict: boolean = (isValidBasicMove || isValidCastlingLeft || isValidCastlingRight) && !mustIJump;
+
+    if(king.castlingLeftStatus === CastlingStatus.ABOUT_TO_CASTLE) {
+      console.log('castlingLeftStatus from '+ king.castlingLeftStatus + ' to '+ CastlingStatus.ALLOWED);
+      king.castlingLeftStatus = CastlingStatus.ALLOWED;
+    }
+    
+    if(king.castlingRightStatus === CastlingStatus.ABOUT_TO_CASTLE) {
+      console.log('castlingRightStatus from '+ king.castlingRightStatus + ' to '+ CastlingStatus.ALLOWED);
+      king.castlingRightStatus = CastlingStatus.ALLOWED;
+    }
+
+    if (verdict && isValidCastlingLeft) {
+      console.log('castlingLeftStatus from '+ king.castlingLeftStatus + ' to '+ CastlingStatus.ABOUT_TO_CASTLE);
+      king.castlingLeftStatus = CastlingStatus.ABOUT_TO_CASTLE;
+    } 
+    
+    if (verdict && isValidCastlingRight) {
+      console.log('castlingRightStatus from '+ king.castlingRightStatus + ' to '+ CastlingStatus.ABOUT_TO_CASTLE);
+      king.castlingRightStatus = CastlingStatus.ABOUT_TO_CASTLE;
+    } 
+
+    return verdict;
   }  
 
   private checkTheRulesForPawn(pawn: ChessPiece, horizontal: number, vertical: number): boolean {   

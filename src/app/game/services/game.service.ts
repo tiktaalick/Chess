@@ -1,7 +1,7 @@
+import { ChessPieceType, EnPassantStatus, CastlingStatus } from './../constants';
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ChessPiece, Coordinates } from '../interfaces';
-import { ChessPieceType, EnPassantStatus} from '../constants';
 
 @Injectable()
 export class GameService implements OnDestroy {
@@ -74,6 +74,9 @@ export class GameService implements OnDestroy {
   }
 
   private createChessPiece(id: number, type: string, isBlack: boolean, coordinates): ChessPiece {
+    const castlingLeftAllowed: boolean = (type === ChessPieceType.KING) || (type === ChessPieceType.ROOK && coordinates.x === 0);
+    const castlingRightAllowed: boolean = (type === ChessPieceType.KING) || (type === ChessPieceType.ROOK && coordinates.x === 7);
+    
     const chessPiece: ChessPiece = {
       id: id,
       type: type,
@@ -81,7 +84,9 @@ export class GameService implements OnDestroy {
       from: {x: coordinates.x, y: coordinates.y},
       to: {x: coordinates.x, y: coordinates.y},
       myTurn: false,
-      enPassantStatus: EnPassantStatus.NOT_ALLOWED
+      enPassantStatus: EnPassantStatus.NOT_ALLOWED,
+      castlingLeftStatus: castlingLeftAllowed ? CastlingStatus.ALLOWED : CastlingStatus.NOT_ALLOWED,
+      castlingRightStatus: castlingRightAllowed ? CastlingStatus.ALLOWED : CastlingStatus.NOT_ALLOWED
     }; 
 
     return chessPiece;

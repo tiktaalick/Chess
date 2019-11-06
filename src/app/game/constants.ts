@@ -25,5 +25,11 @@ export const EnPassantStatus = {
     ABOUT_TO_BE_KICKED_OFF: 'about to be kicked off'
 }
 
+export const CastlingStatus = {
+    ALLOWED: 'allowed',
+    NOT_ALLOWED: 'not allowed',
+    ABOUT_TO_CASTLE: 'about to castle'
+}
+
 export const TILE_SIZE = 70;
 

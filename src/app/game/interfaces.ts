@@ -6,6 +6,8 @@ export interface ChessPiece {
   to: Coordinates;
   myTurn: boolean;
   enPassantStatus: string;
+  castlingLeftStatus: string;
+  castlingRightStatus: string;
 }
 
 export interface Coordinates {
