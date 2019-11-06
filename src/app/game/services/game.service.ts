@@ -36,13 +36,39 @@ export class GameService implements OnDestroy {
   private initializeChessPieces$(): BehaviorSubject<ChessPiece[]> {
     const chessPieces: ChessPiece[] = [];
     
-    chessPieces.push(this.createChessPiece(1, ChessPieceType.KNIGHT, true, {x: 1, y: 0}));
-    chessPieces.push(this.createChessPiece(2, ChessPieceType.QUEEN, true, {x: 3, y: 0}));
-    chessPieces.push(this.createChessPiece(3, ChessPieceType.KNIGHT, true, {x: 6, y: 0}));
+    chessPieces.push(this.createChessPiece(1, ChessPieceType.ROOK, true, {x: 0, y: 0}));
+    chessPieces.push(this.createChessPiece(2, ChessPieceType.KNIGHT, true, {x: 1, y: 0}));
+    chessPieces.push(this.createChessPiece(3, ChessPieceType.BISHOP, true, {x: 2, y: 0}));
+    chessPieces.push(this.createChessPiece(4, ChessPieceType.QUEEN, true, {x: 3, y: 0}));
+    chessPieces.push(this.createChessPiece(5, ChessPieceType.KING, true, {x: 4, y: 0}));
+    chessPieces.push(this.createChessPiece(6, ChessPieceType.BISHOP, true, {x: 5, y: 0}));
+    chessPieces.push(this.createChessPiece(7, ChessPieceType.KNIGHT, true, {x: 6, y: 0}));
+    chessPieces.push(this.createChessPiece(8, ChessPieceType.ROOK, true, {x: 7, y: 0}));
+    chessPieces.push(this.createChessPiece(9, ChessPieceType.PAWN, true, {x: 0, y: 1}));
+    chessPieces.push(this.createChessPiece(10, ChessPieceType.PAWN, true, {x: 1, y: 1}));
+    chessPieces.push(this.createChessPiece(11, ChessPieceType.PAWN, true, {x: 2, y: 1}));
+    chessPieces.push(this.createChessPiece(12, ChessPieceType.PAWN, true, {x: 3, y: 1}));
+    chessPieces.push(this.createChessPiece(13, ChessPieceType.PAWN, true, {x: 4, y: 1}));
+    chessPieces.push(this.createChessPiece(14, ChessPieceType.PAWN, true, {x: 5, y: 1}));
+    chessPieces.push(this.createChessPiece(15, ChessPieceType.PAWN, true, {x: 6, y: 1}));
+    chessPieces.push(this.createChessPiece(16, ChessPieceType.PAWN, true, {x: 7, y: 1}));
     
-    chessPieces.push(this.createChessPiece(4, ChessPieceType.KNIGHT, false, {x: 1, y: 7}));
-    chessPieces.push(this.createChessPiece(5, ChessPieceType.QUEEN, false, {x: 3, y: 7}));
-    chessPieces.push(this.createChessPiece(6, ChessPieceType.KNIGHT, false, {x: 6, y: 7}));
+    chessPieces.push(this.createChessPiece(17, ChessPieceType.ROOK, false, {x: 0, y: 7}));
+    chessPieces.push(this.createChessPiece(18, ChessPieceType.KNIGHT, false, {x: 1, y: 7}));
+    chessPieces.push(this.createChessPiece(19, ChessPieceType.BISHOP, false, {x: 2, y: 7}));
+    chessPieces.push(this.createChessPiece(20, ChessPieceType.QUEEN, false, {x: 3, y: 7}));
+    chessPieces.push(this.createChessPiece(21, ChessPieceType.KING, false, {x: 4, y: 7}));
+    chessPieces.push(this.createChessPiece(22, ChessPieceType.BISHOP, false, {x: 5, y: 7}));
+    chessPieces.push(this.createChessPiece(23, ChessPieceType.KNIGHT, false, {x: 6, y: 7}));
+    chessPieces.push(this.createChessPiece(24, ChessPieceType.ROOK, false, {x: 7, y: 7}));
+    chessPieces.push(this.createChessPiece(25, ChessPieceType.PAWN, false, {x: 0, y: 6}));
+    chessPieces.push(this.createChessPiece(26, ChessPieceType.PAWN, false, {x: 1, y: 6}));
+    chessPieces.push(this.createChessPiece(27, ChessPieceType.PAWN, false, {x: 2, y: 6}));
+    chessPieces.push(this.createChessPiece(28, ChessPieceType.PAWN, false, {x: 3, y: 6}));
+    chessPieces.push(this.createChessPiece(29, ChessPieceType.PAWN, false, {x: 4, y: 6}));
+    chessPieces.push(this.createChessPiece(30, ChessPieceType.PAWN, false, {x: 5, y: 6}));
+    chessPieces.push(this.createChessPiece(31, ChessPieceType.PAWN, false, {x: 6, y: 6}));
+    chessPieces.push(this.createChessPiece(32, ChessPieceType.PAWN, false, {x: 7, y: 6}));
 
     return new BehaviorSubject<ChessPiece[]>(chessPieces);
   }
