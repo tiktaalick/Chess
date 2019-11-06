@@ -132,6 +132,9 @@ export class MoveService implements OnDestroy {
       return this.checkTheRulesForQueen(movingChessPiece, horizontal, vertical);
     } 
     
+    if (movingChessPiece.type === ChessPieceType.KING) {
+      return this.checkTheRulesForKing(horizontal, vertical);
+    } 
   }  
 
   private mustIJump(movingChessPiece: ChessPiece, horizontal: number, vertical: number): boolean {   
@@ -182,10 +185,14 @@ export class MoveService implements OnDestroy {
                                          (horizontal === 0 && vertical !== 0) ||
                                          (Math.abs(horizontal) === Math.abs(vertical));
 
-
     let mustINotJump: boolean = !this.mustIJump(queen, horizontal, vertical);
     
     return isBesidesJumpingValid && mustINotJump ? true : false;
   }  
 
+  private checkTheRulesForKing(horizontal: number, vertical: number): boolean {    
+    return (Math.abs(horizontal) === 1 && Math.abs(vertical) === 0) ||
+           (Math.abs(horizontal) === 0 && Math.abs(vertical) === 1) ||  
+           (Math.abs(horizontal) === 1 && Math.abs(vertical) === 1);
+  }  
 }
