@@ -5,6 +5,7 @@ export interface ChessPiece {
   from: Coordinates;
   to: Coordinates;
   myTurn: boolean;
+  enPassantStatus: string;
 }
 
 export interface Coordinates {

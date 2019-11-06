@@ -19,4 +19,11 @@ export const LighterTile = {
     BLUE: 180
 }
 
+export const EnPassantStatus = {
+    ALLOWED: 'allowed',
+    NOT_ALLOWED: 'not allowed',
+    ABOUT_TO_BE_KICKED_OFF: 'about to be kicked off'
+}
+
 export const TILE_SIZE = 70;
+

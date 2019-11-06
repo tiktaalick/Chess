@@ -1,7 +1,7 @@
 import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ChessPiece, Coordinates } from '../interfaces';
-import { ChessPieceType} from '../constants';
+import { ChessPieceType, EnPassantStatus} from '../constants';
 
 @Injectable()
 export class GameService implements OnDestroy {
@@ -80,7 +80,8 @@ export class GameService implements OnDestroy {
       isBlack: isBlack,
       from: {x: coordinates.x, y: coordinates.y},
       to: {x: coordinates.x, y: coordinates.y},
-      myTurn: false
+      myTurn: false,
+      enPassantStatus: EnPassantStatus.NOT_ALLOWED
     }; 
 
     return chessPiece;

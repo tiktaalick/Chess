@@ -1,8 +1,7 @@
-import { ChessPieceType } from './../constants';
 import { Injectable, OnDestroy } from '@angular/core';
 import { ChessPiece, Coordinates } from '../interfaces';
 import { GameService } from './game.service';
-import { TILE_SIZE } from '../constants';
+import { TILE_SIZE, ChessPieceType, EnPassantStatus } from '../constants';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
@@ -50,7 +49,30 @@ export class MoveService implements OnDestroy {
     }
   }
 
+  private handleEnPassant(movingChessPiece: ChessPiece): ChessPiece {
+    var chessPieceToBeRemovedEnPassent: ChessPiece = this.game.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ABOUT_TO_BE_KICKED_OFF);
+    this.removeChessPiece(chessPieceToBeRemovedEnPassent);
+    
+    var resetEnPassent: ChessPiece = this.game.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ALLOWED);
+    if (resetEnPassent) {
+      resetEnPassent.enPassantStatus = EnPassantStatus.NOT_ALLOWED;
+      console.log('('+resetEnPassent.from.x+','+resetEnPassent.from.y+'): enPassant='+resetEnPassent.enPassantStatus);
+    }
+
+    if (movingChessPiece.type === ChessPieceType.PAWN &&
+        Math.abs(movingChessPiece.to.y - movingChessPiece.from.y) === 2) {
+          movingChessPiece.enPassantStatus = EnPassantStatus.ALLOWED;
+    } 
+    
+    return movingChessPiece;
+  }
+
   public moveChessPiece(movingChessPiece: ChessPiece) { 
+    movingChessPiece = this.handleEnPassant(movingChessPiece);
+    if (movingChessPiece.type === ChessPieceType.PAWN) {
+      console.log('('+movingChessPiece.to.x+','+movingChessPiece.to.y+'): enPassant='+movingChessPiece.enPassantStatus);
+    }
+    
     const to: number = this.field(movingChessPiece.to.x,movingChessPiece.to.y);
     const chessPieceToBeRemoved: ChessPiece = this.game.getChessPiece(to);    
     this.removeChessPiece(chessPieceToBeRemoved)
@@ -203,6 +225,7 @@ export class MoveService implements OnDestroy {
     const isDirectionValid: boolean = pawn.isBlack ? Math.sign(vertical) === 1 : Math.sign(vertical) === -1; 
 
     const chessPieceToBeRemoved = this.game.getChessPiece(this.field(pawn.to.x,pawn.to.y));
+    const chessPieceToBeRemovedEnPassant = this.game.getChessPiece(this.field(pawn.to.x,pawn.to.y-Math.sign(vertical)));
 
     const isMoveBesidesJumpingValid: boolean = 
       (!chessPieceToBeRemoved && horizontal === 0 && Math.abs(vertical) === 1) ||
@@ -210,9 +233,19 @@ export class MoveService implements OnDestroy {
 
     const canIKickSomeoneOffTheBoard: boolean = 
       (chessPieceToBeRemoved && Math.abs(horizontal) === 1 && Math.abs(vertical) === 1);
+    const canIKickSomeoneOffTheBoardEnPassant: boolean = (chessPieceToBeRemovedEnPassant && 
+      chessPieceToBeRemovedEnPassant.enPassantStatus !== EnPassantStatus.NOT_ALLOWED && 
+      Math.abs(horizontal) === 1 && Math.abs(vertical) === 1);
 
     const mustIJump: boolean = this.mustIJump(pawn, horizontal, vertical);
+
+    const verdict: boolean = isDirectionValid && !mustIJump &&
+      (isMoveBesidesJumpingValid || canIKickSomeoneOffTheBoard || canIKickSomeoneOffTheBoardEnPassant) ? true : false;
+
+    if (verdict && canIKickSomeoneOffTheBoardEnPassant) {
+      chessPieceToBeRemovedEnPassant.enPassantStatus = EnPassantStatus.ABOUT_TO_BE_KICKED_OFF;
+    }
     
-    return isDirectionValid && (isMoveBesidesJumpingValid || canIKickSomeoneOffTheBoard) && !mustIJump ? true : false;
+    return verdict;
   }  
 }
