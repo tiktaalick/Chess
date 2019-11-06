@@ -124,6 +124,10 @@ export class MoveService implements OnDestroy {
       return this.checkTheRulesForKnight(horizontal, vertical);
     }
 
+    if (movingChessPiece.type === ChessPieceType.BISHOP) {
+      return this.checkTheRulesForBishop(movingChessPiece, horizontal, vertical);
+    }
+
     if (movingChessPiece.type === ChessPieceType.QUEEN) {
       return this.checkTheRulesForQueen(movingChessPiece, horizontal, vertical);
     } 
@@ -163,6 +167,14 @@ export class MoveService implements OnDestroy {
   private checkTheRulesForKnight(horizontal: number, vertical: number): boolean {    
     return (Math.abs(horizontal) === 2 && Math.abs(vertical) === 1) ||
            (Math.abs(horizontal) === 1 && Math.abs(vertical) === 2);
+  }  
+
+  private checkTheRulesForBishop(bishop: ChessPiece, horizontal: number, vertical: number): boolean {   
+    let isBesidesJumpingValid: boolean = (Math.abs(horizontal) === Math.abs(vertical));
+
+    let mustINotJump: boolean = !this.mustIJump(bishop, horizontal, vertical);
+    
+    return isBesidesJumpingValid && mustINotJump ? true : false;
   }  
 
   private checkTheRulesForQueen(queen: ChessPiece, horizontal: number, vertical: number): boolean {   
