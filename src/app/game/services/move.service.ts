@@ -18,7 +18,7 @@ export class MoveService implements OnDestroy {
   constructor(private game: GameService) { 
     this.isBlackMove$.subscribe(isBlackMove => {
       this.game.chessPieces.forEach(movingChessPiece => {
-        movingChessPiece.myTurn = movingChessPiece.isBlack == isBlackMove;
+        movingChessPiece.myTurn = movingChessPiece.isBlack === isBlackMove;
       })
     })
   }
@@ -71,9 +71,13 @@ export class MoveService implements OnDestroy {
       this.resetValidMove(this.dragPosition);
       this.dragPosition = { x: movingChessPiece.to.x, y: movingChessPiece.to.y };
       return true;
-    } else if (!isMoving) {
+    } 
+    
+    if (!isMoving) {
       return true;
-    } else return false;
+    } 
+    
+    return false;
   }
 
   public isMoveAllowed(event: any, field: number, isMoving: boolean): ChessPiece {
@@ -85,13 +89,15 @@ export class MoveService implements OnDestroy {
 
     const checkIfAllowed: boolean = this.doCheckIfAllowed(movingChessPiece, isMoving); 
 
-    if (checkIfAllowed && chessPieceToBeRemoved && chessPieceToBeRemoved.isBlack == movingChessPiece.isBlack) {
+    if (checkIfAllowed && chessPieceToBeRemoved && chessPieceToBeRemoved.isBlack === movingChessPiece.isBlack) {
       return null;
-    } else if (checkIfAllowed && this.checkTheRules(movingChessPiece)) {
+    } 
+    
+    if (checkIfAllowed && this.checkTheRules(movingChessPiece)) {
       return movingChessPiece;
-    } else {
-      return null;
-    }  
+    } 
+    
+    return null;
   }
   
   public showValidMove(coordinates: Coordinates) {
@@ -103,19 +109,55 @@ export class MoveService implements OnDestroy {
   }
 
   private checkTheRules(movingChessPiece: ChessPiece): boolean {
-    if (movingChessPiece.to.x >= 8 || movingChessPiece.to.y >= 8) {
-      return false;
-    } else if (movingChessPiece.type == ChessPieceType.QUEEN) {
-      return this.checkTheRulesForKnight(movingChessPiece);
-    } else if (movingChessPiece.type == ChessPieceType.KNIGHT) {
-      return this.checkTheRulesForKnight(movingChessPiece);
-    }
-  }  
-
-  private checkTheRulesForKnight(movingChessPiece: ChessPiece): boolean {    
     const horizontal = movingChessPiece.to.x - movingChessPiece.from.x; 
     const vertical = movingChessPiece.to.y - movingChessPiece.from.y;
 
+    if (movingChessPiece.to.x >= 8 || movingChessPiece.to.y >= 8) {
+      return false;
+    } 
+    
+    if (movingChessPiece.type === ChessPieceType.QUEEN) {
+      return this.checkTheRulesForQueen(movingChessPiece, horizontal, vertical);
+    } 
+    
+    if (movingChessPiece.type === ChessPieceType.KNIGHT) {
+      return this.checkTheRulesForKnight(horizontal, vertical);
+    }
+  }  
+
+  private mustIJump(movingChessPiece: ChessPiece, horizontal: number, vertical: number): boolean {   
+    const stepX = Math.sign(horizontal);
+    const stepY = Math.sign(vertical);
+    const startX = movingChessPiece.from.x + stepX;
+    const startY = movingChessPiece.from.y + stepY;
+
+    for (var dragPosition: Coordinates = {x: startX, y: startY}; 
+        dragPosition.x !== movingChessPiece.to.x || 
+        dragPosition.y !== movingChessPiece.to.y; 
+        dragPosition.x += stepX, dragPosition.y += stepY) {
+      if (this.game.getChessPiece(this.field(dragPosition.x,dragPosition.y))) {
+        return true;
+      }
+      if (dragPosition.x < 0 || dragPosition.x > 7 || dragPosition.y < 0 || dragPosition.y > 7) {
+        return true
+      }
+    }
+
+    return false;
+  }
+
+  private checkTheRulesForQueen(queen: ChessPiece, horizontal: number, vertical: number): boolean {   
+    let isBesidesJumpingValid: boolean = (horizontal !== 0 && vertical === 0) ||
+                                         (horizontal === 0 && vertical !== 0) ||
+                                         (Math.abs(horizontal) === Math.abs(vertical));
+
+
+    let mustINotJump: boolean = !this.mustIJump(queen, horizontal, vertical);
+    
+    return isBesidesJumpingValid && mustINotJump ? true : false;
+  }  
+
+  private checkTheRulesForKnight(horizontal: number, vertical: number): boolean {    
     return (Math.abs(horizontal) === 2 && Math.abs(vertical) === 1) ||
            (Math.abs(horizontal) === 1 && Math.abs(vertical) === 2);
   }  

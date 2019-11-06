@@ -30,7 +30,7 @@ export class GameService implements OnDestroy {
     const fieldY = this.coordinates(field).y;
 
     return this.chessPieces.find(
-      chessPiece => chessPiece.from.x == fieldX && chessPiece.from.y == fieldY);    
+      chessPiece => chessPiece.from.x === fieldX && chessPiece.from.y === fieldY);    
   }
 
   private initializeChessPieces$(): BehaviorSubject<ChessPiece[]> {
@@ -63,7 +63,7 @@ export class GameService implements OnDestroy {
   public hasAChessPieceOfType(field: number, type: string): boolean {
     const chessPiece: ChessPiece = this.getChessPiece(field);
 
-    return chessPiece && chessPiece.type == type ? true : false;
+    return chessPiece && chessPiece.type === type ? true : false;
   }
 
 }
