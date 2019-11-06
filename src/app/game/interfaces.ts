@@ -1,4 +1,3 @@
-import { Coordinates } from './coordinates';
 export interface ChessPiece {
   id: number;
   type: string;
@@ -7,3 +6,14 @@ export interface ChessPiece {
   to: Coordinates;
   myTurn: boolean;
 }
+
+export interface Coordinates {
+  x: number;
+  y: number;
+}
+
+export interface Field {
+  number: number;
+  isValidMove: boolean;
+}
+

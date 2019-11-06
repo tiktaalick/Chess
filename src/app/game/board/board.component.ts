@@ -1,9 +1,7 @@
 import { MoveService } from './../services/move.service';
-import { Field } from './../interfaces/field';
-import { ChessPiece } from './../interfaces/chess.piece';
-import { ChessPieceType } from './../constants';
 import { GameService } from '../services/game.service';
 import { Component, OnDestroy } from '@angular/core';
+import { Field, ChessPiece } from '../interfaces';
 
 @Component({
   selector: 'app-board',
@@ -59,8 +57,12 @@ export class BoardComponent implements OnDestroy{
     return (this.game.coordinates(field).x + this.game.coordinates(field).y) % 2 === 1;
   }
 
-  public hasAKnight(field: number): boolean {
-    return this.game.hasAChessPieceOfType(field, ChessPieceType.KNIGHT);
+  public hasAChessPiece(field: number): boolean {
+    return this.game.getChessPiece(field) ? true : false;
+  }
+
+  public getChessPiece(field: number): ChessPiece {
+    return this.game.getChessPiece(field);
   }
 
   public isDragDisabled(field: number) {

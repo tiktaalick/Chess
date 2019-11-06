@@ -4,10 +4,9 @@
             [darkerTile]="isDarkerTile(field.number)" [isValidMove]="field.isValidMove">
             <div cdkDrag [cdkDragDisabled]="isDragDisabled(field.number)"
                 (cdkDragMoved)="onDragMoved($event, field.number)" (cdkDragEnded)="onDragEnded($event, field.number)">
-                <app-knight cdkDragHandle cdkDragPosition="cdkDragPosition" *ngIf="hasAKnight(field.number)"
-                    [isBlack]=isChessPieceBlack(field.number)>
-
-                </app-knight>
+                <app-chess-piece cdkDragHandle cdkDragPosition="cdkDragPosition" *ngIf="hasAChessPiece(field.number)"
+                    [chessPiece]=getChessPiece(field.number)>
+                </app-chess-piece>
             </div>
         </app-square>
     </div>

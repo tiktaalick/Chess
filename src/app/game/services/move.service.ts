@@ -1,7 +1,6 @@
 import { ChessPieceType } from './../constants';
-import { Coordinates } from './../interfaces/coordinates';
 import { Injectable, OnDestroy } from '@angular/core';
-import { ChessPiece } from '../interfaces/chess.piece';
+import { ChessPiece, Coordinates } from '../interfaces';
 import { GameService } from './game.service';
 import { TILE_SIZE } from '../constants';
 import { BehaviorSubject } from 'rxjs';
@@ -104,17 +103,17 @@ export class MoveService implements OnDestroy {
   }
 
   private checkTheRules(movingChessPiece: ChessPiece): boolean {
-    if (movingChessPiece.type == ChessPieceType.KNIGHT) {
+    if (movingChessPiece.to.x >= 8 || movingChessPiece.to.y >= 8) {
+      return false;
+    } else if (movingChessPiece.type == ChessPieceType.QUEEN) {
+      return this.checkTheRulesForKnight(movingChessPiece);
+    } else if (movingChessPiece.type == ChessPieceType.KNIGHT) {
       return this.checkTheRulesForKnight(movingChessPiece);
     }
   }  
 
-  private checkTheRulesForKnight(movingChessPiece: ChessPiece): boolean {
-    if (movingChessPiece.to.x >= 8 || movingChessPiece.to.y >= 8) {
-      return false;
-    }
-    
-    const horizontal = movingChessPiece.to.x - movingChessPiece.from.x;
+  private checkTheRulesForKnight(movingChessPiece: ChessPiece): boolean {    
+    const horizontal = movingChessPiece.to.x - movingChessPiece.from.x; 
     const vertical = movingChessPiece.to.y - movingChessPiece.from.y;
 
     return (Math.abs(horizontal) === 2 && Math.abs(vertical) === 1) ||

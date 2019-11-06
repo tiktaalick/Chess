@@ -1,9 +1,7 @@
-import { MoveService } from './move.service';
-import { Coordinates } from '../interfaces/coordinates';
-import { Injectable, OnInit, OnDestroy } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
-import { ChessPiece } from '../interfaces/chess.piece';
-import { ChessPieceType, TILE_SIZE} from '../constants';
+import { ChessPiece, Coordinates } from '../interfaces';
+import { ChessPieceType} from '../constants';
 
 @Injectable()
 export class GameService implements OnDestroy {
@@ -39,9 +37,12 @@ export class GameService implements OnDestroy {
     const chessPieces: ChessPiece[] = [];
     
     chessPieces.push(this.createChessPiece(1, ChessPieceType.KNIGHT, true, {x: 1, y: 0}));
-    chessPieces.push(this.createChessPiece(2, ChessPieceType.KNIGHT, true, {x: 6, y: 0}));
-    chessPieces.push(this.createChessPiece(3, ChessPieceType.KNIGHT, false, {x: 1, y: 7}));
-    chessPieces.push(this.createChessPiece(4, ChessPieceType.KNIGHT, false, {x: 6, y: 7}));
+    chessPieces.push(this.createChessPiece(2, ChessPieceType.QUEEN, true, {x: 3, y: 0}));
+    chessPieces.push(this.createChessPiece(3, ChessPieceType.KNIGHT, true, {x: 6, y: 0}));
+    
+    chessPieces.push(this.createChessPiece(4, ChessPieceType.KNIGHT, false, {x: 1, y: 7}));
+    chessPieces.push(this.createChessPiece(5, ChessPieceType.QUEEN, false, {x: 3, y: 7}));
+    chessPieces.push(this.createChessPiece(6, ChessPieceType.KNIGHT, false, {x: 6, y: 7}));
 
     return new BehaviorSubject<ChessPiece[]>(chessPieces);
   }
