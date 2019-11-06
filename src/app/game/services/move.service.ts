@@ -67,11 +67,21 @@ export class MoveService implements OnDestroy {
     return movingChessPiece;
   }
 
+  private promotePawn(movingChessPiece: ChessPiece): ChessPiece {
+    if (movingChessPiece.type === ChessPieceType.PAWN && [0,7].indexOf(movingChessPiece.to.y) > -1) {
+      movingChessPiece.type = ChessPieceType.QUEEN;
+    }
+    
+    return movingChessPiece;
+  }
+
   public moveChessPiece(movingChessPiece: ChessPiece) { 
     movingChessPiece = this.handleEnPassant(movingChessPiece);
     if (movingChessPiece.type === ChessPieceType.PAWN) {
       console.log('('+movingChessPiece.to.x+','+movingChessPiece.to.y+'): enPassant='+movingChessPiece.enPassantStatus);
     }
+
+    movingChessPiece = this.promotePawn(movingChessPiece);
     
     const to: number = this.field(movingChessPiece.to.x,movingChessPiece.to.y);
     const chessPieceToBeRemoved: ChessPiece = this.game.getChessPiece(to);    
