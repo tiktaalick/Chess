@@ -1,8 +1,7 @@
+import { CastlingStatus, TILE_SIZE, ChessPieceType, EnPassantStatus } from '../constants';
 import { ChessPiece, Coordinates } from '../interfaces';
-import { CastlingStatus } from './../constants';
 import { Injectable, OnDestroy } from '@angular/core';
 import { GameService } from './game.service';
-import { TILE_SIZE, ChessPieceType, EnPassantStatus } from '../constants';
 import { BehaviorSubject } from 'rxjs';
 
 @Injectable()
@@ -68,8 +67,6 @@ export class MoveService implements OnDestroy {
   }
 
   private castleRook(king: ChessPiece, castleLeft: boolean) {
-    console.log('('+king.to.x+','+king.to.y+'): castling='+CastlingStatus.ABOUT_TO_CASTLE);
-    
     let rookToCastle: ChessPiece = this.game.chessPieces.find(
       chessPiece => chessPiece.type === ChessPieceType.ROOK && 
                     chessPiece.isBlack === king.isBlack &&
@@ -91,8 +88,6 @@ export class MoveService implements OnDestroy {
     this.game.chessPieces[index].castlingRightStatus = castleLeft 
                     ? this.game.chessPieces[index].castlingRightStatus 
                     : CastlingStatus.NOT_ALLOWED;
-    console.log('king.castlingLeftStatus='+this.game.chessPieces[index].castlingLeftStatus);
-    console.log('king.castlingRightStatus='+this.game.chessPieces[index].castlingRightStatus);
   }
 
   private handleCastling(movingChessPiece: ChessPiece): ChessPiece {
@@ -115,8 +110,6 @@ export class MoveService implements OnDestroy {
     if([ChessPieceType.KING, ChessPieceType.ROOK].indexOf(movingChessPiece.type) > -1) {
       movingChessPiece.castlingLeftStatus = CastlingStatus.NOT_ALLOWED;
       movingChessPiece.castlingRightStatus = CastlingStatus.NOT_ALLOWED;
-      console.log('('+movingChessPiece.to.x+','+movingChessPiece.to.y+'): castlingLeftStatus='+movingChessPiece.castlingLeftStatus);
-      console.log('('+movingChessPiece.to.x+','+movingChessPiece.to.y+'): castlingRightStatus='+movingChessPiece.castlingRightStatus);
     }     
     
     return movingChessPiece;
@@ -130,19 +123,49 @@ export class MoveService implements OnDestroy {
     return movingChessPiece;
   }
 
+  private isCheck(isBlack: boolean): boolean {
+    let king: ChessPiece = this.game.chessPieces.find(
+      chessPiece => 
+        chessPiece.type === ChessPieceType.KING &&
+        chessPiece.isBlack === isBlack
+    );
+
+    this.game.chessPieces.forEach((chessPiece: ChessPiece) => {
+        if (chessPiece.isBlack !== isBlack) {
+          let oldToX = chessPiece.to.x;
+          let oldToY = chessPiece.to.y;
+          chessPiece.to.x = king.from.x;
+          chessPiece.to.y = king.from.y;
+          let isCheck = this.checkTheRules(chessPiece);
+          chessPiece.to.x = oldToX;
+          chessPiece.to.y = oldToY;
+          if (isCheck) {
+            console.log((chessPiece.isBlack ? 'black' : 'white') + ' '+chessPiece.type+': ('+chessPiece.from.x+','+chessPiece.from.y+') => ('+king.from.x+','+king.from.y+') Check!')
+            return true;
+          }
+        }
+      });
+
+    return false;
+  }
+  
   public moveChessPiece(movingChessPiece: ChessPiece) { 
     movingChessPiece = this.handleEnPassant(movingChessPiece);
     movingChessPiece = this.handleCastling(movingChessPiece);
     movingChessPiece = this.promotePawn(movingChessPiece);
-    
+
     const to: number = this.field(movingChessPiece.to.x,movingChessPiece.to.y);
     const chessPieceToBeRemoved: ChessPiece = this.game.getChessPiece(to);    
     this.removeChessPiece(chessPieceToBeRemoved)
     
     const index: number = this.game.chessPieces.indexOf(movingChessPiece);    
-    movingChessPiece.from = movingChessPiece.to;
+    movingChessPiece.from.x = movingChessPiece.to.x;
+    movingChessPiece.from.y = movingChessPiece.to.y;
     this.game.chessPieces[index] = movingChessPiece;
     this.game.chessPieces$.next(this.game.chessPieces);
+
+    this.isCheck(movingChessPiece.isBlack);
+    this.isCheck(!movingChessPiece.isBlack);    
 
     this.resetValidMove(this.dragPosition);
     this.isBlackMove$.next(!this.isBlackMove$.getValue());
@@ -231,7 +254,7 @@ export class MoveService implements OnDestroy {
     const startX = movingChessPiece.from.x + stepX;
     const startY = movingChessPiece.from.y + stepY;
 
-    for (var dragPosition: Coordinates = {x: startX, y: startY}; 
+    for (let dragPosition: Coordinates = {x: startX, y: startY}; 
         dragPosition.x !== movingChessPiece.to.x || 
         dragPosition.y !== movingChessPiece.to.y; 
         dragPosition.x += stepX, dragPosition.y += stepY) {
@@ -278,40 +301,31 @@ export class MoveService implements OnDestroy {
   }  
 
   private checkTheRulesForKing(king: ChessPiece, horizontal: number, vertical: number): boolean {    
-    console.log('castlingLeftStatus='+ king.castlingLeftStatus);
-    console.log('castlingRightStatus='+ king.castlingRightStatus);
-
     const isValidBasicMove: boolean = (Math.abs(horizontal) === 1 && Math.abs(vertical) === 0) ||
                                       (Math.abs(horizontal) === 0 && Math.abs(vertical) === 1) ||  
                                       (Math.abs(horizontal) === 1 && Math.abs(vertical) === 1);
+
     const mustIJump: boolean = this.mustIJump(king, horizontal, vertical);
+
     const someoneBlockingRook: ChessPiece = this.game.getChessPiece(this.field(1,king.isBlack ? 0 : 7))
-
-    const isValidCastlingLeft: boolean = 
-      (king.castlingLeftStatus !== CastlingStatus.NOT_ALLOWED && !someoneBlockingRook && horizontal === -2);
-
-    const isValidCastlingRight: boolean = 
-      (king.castlingRightStatus !== CastlingStatus.NOT_ALLOWED && horizontal === 2); 
+    const isValidCastlingLeft: boolean = (king.castlingLeftStatus !== CastlingStatus.NOT_ALLOWED && !someoneBlockingRook && horizontal === -2);
+    const isValidCastlingRight: boolean = (king.castlingRightStatus !== CastlingStatus.NOT_ALLOWED && horizontal === 2); 
 
     const verdict: boolean = (isValidBasicMove || isValidCastlingLeft || isValidCastlingRight) && !mustIJump;
 
     if(king.castlingLeftStatus === CastlingStatus.ABOUT_TO_CASTLE) {
-      console.log('castlingLeftStatus from '+ king.castlingLeftStatus + ' to '+ CastlingStatus.ALLOWED);
       king.castlingLeftStatus = CastlingStatus.ALLOWED;
     }
     
     if(king.castlingRightStatus === CastlingStatus.ABOUT_TO_CASTLE) {
-      console.log('castlingRightStatus from '+ king.castlingRightStatus + ' to '+ CastlingStatus.ALLOWED);
       king.castlingRightStatus = CastlingStatus.ALLOWED;
     }
 
     if (verdict && isValidCastlingLeft) {
-      console.log('castlingLeftStatus from '+ king.castlingLeftStatus + ' to '+ CastlingStatus.ABOUT_TO_CASTLE);
       king.castlingLeftStatus = CastlingStatus.ABOUT_TO_CASTLE;
     } 
     
     if (verdict && isValidCastlingRight) {
-      console.log('castlingRightStatus from '+ king.castlingRightStatus + ' to '+ CastlingStatus.ABOUT_TO_CASTLE);
       king.castlingRightStatus = CastlingStatus.ABOUT_TO_CASTLE;
     } 
 
