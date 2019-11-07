@@ -1,4 +1,4 @@
-import { DarkerTile, LighterTile } from '../../constants';
+import { DarkerTile, LighterTile, ValidMove, CheckMove } from '../../constants';
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
@@ -9,6 +9,7 @@ import { Component, OnInit, Input } from '@angular/core';
 export class SquareComponent {
   @Input() darkerTile: boolean;
   @Input() isValidMove: boolean;
+  @Input() isCheckMove: boolean;
   @Input() field: number;
   @Input() x: number;
   @Input() y: number;
@@ -16,13 +17,15 @@ export class SquareComponent {
   constructor() { }
 
   public getStyle() {
-    const standard = this.darkerTile
+    let style = this.darkerTile
         ? { backgroundColor: "rgb("+DarkerTile.RED+","+DarkerTile.GREEN+","+DarkerTile.BLUE+")" }
         : { backgroundColor: "rgb("+LighterTile.RED+","+LighterTile.GREEN+","+LighterTile.BLUE+")" };
 
-    const style = this.isValidMove
-        ? { backgroundColor: "rgb("+DarkerTile.RED+",255,"+DarkerTile.BLUE+")" }
-        : standard;
+    if (this.isValidMove) {
+      style = { backgroundColor: "rgb("+ValidMove.RED+","+ValidMove.GREEN+","+ValidMove.BLUE+")" };
+    } else if (this.isCheckMove) {
+      style = { backgroundColor: "rgb("+CheckMove.RED+","+CheckMove.GREEN+","+CheckMove.BLUE+")" };
+    }
 
     return style;
   }

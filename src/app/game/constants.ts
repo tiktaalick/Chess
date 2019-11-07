@@ -19,6 +19,18 @@ export const LighterTile = {
     BLUE: 180
 }
 
+export const ValidMove = {
+    RED: 140,
+    GREEN: 255,
+    BLUE: 0
+}
+
+export const CheckMove = {
+    RED: 255,
+    GREEN: 100,
+    BLUE: 0
+}
+
 export const EnPassantStatus = {
     ALLOWED: 'allowed',
     NOT_ALLOWED: 'not allowed',

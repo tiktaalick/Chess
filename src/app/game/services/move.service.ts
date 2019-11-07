@@ -7,7 +7,8 @@ import { BehaviorSubject } from 'rxjs';
 @Injectable()
 export class MoveService implements OnDestroy {
   public validMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
-  public resetMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
+  public resetValidMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
+  public checkMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
   public isBlackMove$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private dragPosition: Coordinates = {x: 0, y: 0};
   private field(x: number, y: number): number {
@@ -145,9 +146,14 @@ export class MoveService implements OnDestroy {
           if (isCheck) {
             checkPiece = chessPiece;
             console.log((chessPiece.isBlack ? 'black' : 'white') + ' '+chessPiece.type+': ('+chessPiece.from.x+','+chessPiece.from.y+') => ('+king.from.x+','+king.from.y+') Check!')
-          }
+          } 
         }
       });
+
+    if(checkPiece) {
+      this.showCheckMove({x: king.from.x, y: king.from.y});
+      this.showCheckMove({x: checkPiece.from.x, y: checkPiece.from.y});
+    }
 
     return checkPiece;
   }
@@ -167,10 +173,10 @@ export class MoveService implements OnDestroy {
     this.game.chessPieces[index] = movingChessPiece;
     this.game.chessPieces$.next(this.game.chessPieces);
 
-    this.isCheck(!movingChessPiece.isBlack);
-
     this.resetValidMove(this.dragPosition);
     this.isBlackMove$.next(!this.isBlackMove$.getValue());
+
+    this.isCheck(!movingChessPiece.isBlack);
   }
 
   private doCheckIfAllowed(movingChessPiece: ChessPiece, isMoving: boolean): boolean {
@@ -241,7 +247,11 @@ export class MoveService implements OnDestroy {
   }
 
   private resetValidMove(coordinates: Coordinates) {
-    this.resetMove$.next(this.field(coordinates.x,coordinates.y));
+    this.resetValidMove$.next(this.field(coordinates.x,coordinates.y));
+  }
+
+  public showCheckMove(coordinates: Coordinates) {
+    this.checkMove$.next(this.field(coordinates.x,coordinates.y));
   }
 
   private checkTheRules(movingChessPiece: ChessPiece): boolean {

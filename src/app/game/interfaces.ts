@@ -18,5 +18,6 @@ export interface Coordinates {
 export interface Field {
   number: number;
   isValidMove: boolean;
+  isCheckMove: boolean;
 }
 

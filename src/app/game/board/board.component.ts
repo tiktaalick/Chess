@@ -10,7 +10,8 @@ import { Field, ChessPiece } from '../interfaces';
 })
 export class BoardComponent implements OnDestroy{
   private validMove$ = this.move.validMove$;
-  private resetMove$ = this.move.resetMove$;
+  private resetValidMove$ = this.move.resetValidMove$;
+  private checkMove$ = this.move.checkMove$;
   
   public fields: Field[] = this.createFieldArray();
   
@@ -21,16 +22,24 @@ export class BoardComponent implements OnDestroy{
       }  
     });
 
-    this.resetMove$.subscribe(move => {
+    this.resetValidMove$.subscribe(move => {
       if(this.fields[move]) {
         this.fields[move].isValidMove = false;
+      }  
+
+      this.fields.forEach(field => field.isCheckMove = false);
+    });
+
+    this.checkMove$.subscribe(move => {
+      if(this.fields[move]) {
+        this.fields[move].isCheckMove = true;        
       }  
     });
   }  
 
   ngOnDestroy(): void {
     this.validMove$.unsubscribe();
-    this.resetMove$.unsubscribe();
+    this.resetValidMove$.unsubscribe();
   }
 
   private createFieldArray(): Field[] {
@@ -38,7 +47,8 @@ export class BoardComponent implements OnDestroy{
     for (let i = 0; i < 64; i++) {
       const field: Field = {
         number: i,
-        isValidMove: false
+        isValidMove: false,
+        isCheckMove: false
       };
       fields.push(field);
     }    
