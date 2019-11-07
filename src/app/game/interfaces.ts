@@ -2,6 +2,7 @@ export interface ChessPiece {
   id: number;
   type: string;
   isBlack: boolean; 
+  isCheckMove: boolean;
   from: Coordinates;
   to: Coordinates;
   myTurn: boolean;

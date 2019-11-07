@@ -88,7 +88,7 @@ export class BoardComponent implements OnDestroy{
   }
 
   public onDragMoved(event: any, field: number) {
-    const movingChessPiece: ChessPiece = this.move.isMoveAllowed(event, field, true);
+    const movingChessPiece: ChessPiece = this.move.checkTheRules(event, field, true);
 
     if(movingChessPiece) {
       this.move.showValidMove(movingChessPiece.to);
@@ -96,7 +96,7 @@ export class BoardComponent implements OnDestroy{
   }
 
   public onDragEnded(event: any, field: number) {
-    const movingChessPiece: ChessPiece = this.move.isMoveAllowed(event, field, false);
+    const movingChessPiece: ChessPiece = this.move.checkTheRules(event, field, false);
 
     if(movingChessPiece) {
       this.move.moveChessPiece(movingChessPiece);      

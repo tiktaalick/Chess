@@ -1,3 +1,4 @@
+import { BoardComponent } from './../board/board.component';
 import { CastlingStatus, TILE_SIZE, ChessPieceType, EnPassantStatus } from '../constants';
 import { ChessPiece, Coordinates } from '../interfaces';
 import { Injectable, OnDestroy } from '@angular/core';
@@ -124,7 +125,7 @@ export class MoveService implements OnDestroy {
     return movingChessPiece;
   }
 
-  private isCheck(isBlack: boolean): ChessPiece {
+  private handleCheck(isBlack: boolean): ChessPiece {
     let king: ChessPiece = this.game.chessPieces.find(
       chessPiece => 
         chessPiece.type === ChessPieceType.KING &&
@@ -140,12 +141,11 @@ export class MoveService implements OnDestroy {
           let oldToY = chessPiece.to.y;
           chessPiece.to.x = king.from.x;
           chessPiece.to.y = king.from.y;
-          isCheck = this.checkTheRules(chessPiece);
+          isCheck = this.isMoveAllowed(chessPiece);
           chessPiece.to.x = oldToX;
           chessPiece.to.y = oldToY;
           if (isCheck) {
             checkPiece = chessPiece;
-            console.log((chessPiece.isBlack ? 'black' : 'white') + ' '+chessPiece.type+': ('+chessPiece.from.x+','+chessPiece.from.y+') => ('+king.from.x+','+king.from.y+') Check!')
           } 
         }
       });
@@ -153,6 +153,7 @@ export class MoveService implements OnDestroy {
     if(checkPiece) {
       this.showCheckMove({x: king.from.x, y: king.from.y});
       this.showCheckMove({x: checkPiece.from.x, y: checkPiece.from.y});
+      king.isCheckMove = true;
     }
 
     return checkPiece;
@@ -170,13 +171,15 @@ export class MoveService implements OnDestroy {
     const index: number = this.game.chessPieces.indexOf(movingChessPiece);    
     movingChessPiece.from.x = movingChessPiece.to.x;
     movingChessPiece.from.y = movingChessPiece.to.y;
+    this.game.chessPieces.forEach(chessPiece => chessPiece.isCheckMove = false);
     this.game.chessPieces[index] = movingChessPiece;
+
     this.game.chessPieces$.next(this.game.chessPieces);
 
     this.resetValidMove(this.dragPosition);
     this.isBlackMove$.next(!this.isBlackMove$.getValue());
 
-    this.isCheck(!movingChessPiece.isBlack);
+    this.handleCheck(!movingChessPiece.isBlack);
   }
 
   private doCheckIfAllowed(movingChessPiece: ChessPiece, isMoving: boolean): boolean {
@@ -206,7 +209,7 @@ export class MoveService implements OnDestroy {
 
     this.game.chessPieces[index] = movingChessPiece;
 
-    const checkPiece: ChessPiece = this.isCheck(movingChessPiece.isBlack);
+    const checkPiece: ChessPiece = this.handleCheck(movingChessPiece.isBlack);
 
     movingChessPiece.from.x = oldFromX;
     movingChessPiece.from.y = oldFromY;
@@ -217,7 +220,7 @@ export class MoveService implements OnDestroy {
            checkPiece.from.y === movingChessPiece.to.y ? null : checkPiece;
   }
   
-  public isMoveAllowed(event: any, field: number, isMoving: boolean): ChessPiece {
+  public checkTheRules(event: any, field: number, isMoving: boolean): ChessPiece {
     const movingChessPiece: ChessPiece = this.game.getChessPiece(field);
     movingChessPiece.to.x = this.getNewPosition(event).x;
     movingChessPiece.to.y = this.getNewPosition(event).y;
@@ -235,7 +238,7 @@ export class MoveService implements OnDestroy {
       return null;
     } 
     
-    if (checkIfAllowed && this.checkTheRules(movingChessPiece)) {
+    if (checkIfAllowed && this.isMoveAllowed(movingChessPiece)) {
       return movingChessPiece;
     } 
     
@@ -254,7 +257,7 @@ export class MoveService implements OnDestroy {
     this.checkMove$.next(this.field(coordinates.x,coordinates.y));
   }
 
-  private checkTheRules(movingChessPiece: ChessPiece): boolean {
+  private isMoveAllowed(movingChessPiece: ChessPiece): boolean {
     const horizontal = movingChessPiece.to.x - movingChessPiece.from.x; 
     const vertical = movingChessPiece.to.y - movingChessPiece.from.y;
 
@@ -263,27 +266,27 @@ export class MoveService implements OnDestroy {
     } 
     
     if (movingChessPiece.type === ChessPieceType.ROOK) {
-      return this.checkTheRulesForRook(movingChessPiece, horizontal, vertical);
+      return this.isRookMoveAllowed(movingChessPiece, horizontal, vertical);
     } 
 
     if (movingChessPiece.type === ChessPieceType.KNIGHT) {
-      return this.checkTheRulesForKnight(horizontal, vertical);
+      return this.isKnightMoveAllowed(horizontal, vertical);
     }
 
     if (movingChessPiece.type === ChessPieceType.BISHOP) {
-      return this.checkTheRulesForBishop(movingChessPiece, horizontal, vertical);
+      return this.isBishopMoveAllowed(movingChessPiece, horizontal, vertical);
     }
 
     if (movingChessPiece.type === ChessPieceType.QUEEN) {
-      return this.checkTheRulesForQueen(movingChessPiece, horizontal, vertical);
+      return this.isQueenMoveAllowed(movingChessPiece, horizontal, vertical);
     } 
     
     if (movingChessPiece.type === ChessPieceType.KING) {
-      return this.checkTheRulesForKing(movingChessPiece, horizontal, vertical);
+      return this.isKingMoveAllowed(movingChessPiece, horizontal, vertical);
     } 
 
     if (movingChessPiece.type === ChessPieceType.PAWN) {
-      return this.checkTheRulesForPawn(movingChessPiece, horizontal, vertical);
+      return this.isPawnMoveAllowed(movingChessPiece, horizontal, vertical);
     } 
   }  
 
@@ -308,7 +311,7 @@ export class MoveService implements OnDestroy {
     return false;
   }
 
-  private checkTheRulesForRook(rook: ChessPiece, horizontal: number, vertical: number): boolean {   
+  private isRookMoveAllowed(rook: ChessPiece, horizontal: number, vertical: number): boolean {   
     const isBesidesJumpingValid: boolean = (horizontal !== 0 && vertical === 0) ||
                                            (horizontal === 0 && vertical !== 0);
 
@@ -317,19 +320,19 @@ export class MoveService implements OnDestroy {
     return isBesidesJumpingValid && !mustIJump ? true : false;
   }  
 
-  private checkTheRulesForKnight(horizontal: number, vertical: number): boolean {    
+  private isKnightMoveAllowed(horizontal: number, vertical: number): boolean {    
     return (Math.abs(horizontal) === 2 && Math.abs(vertical) === 1) ||
            (Math.abs(horizontal) === 1 && Math.abs(vertical) === 2);
   }  
 
-  private checkTheRulesForBishop(bishop: ChessPiece, horizontal: number, vertical: number): boolean {   
+  private isBishopMoveAllowed(bishop: ChessPiece, horizontal: number, vertical: number): boolean {   
     const isBesidesJumpingValid: boolean = (Math.abs(horizontal) === Math.abs(vertical));
     const mustIJump: boolean = this.mustIJump(bishop, horizontal, vertical);
     
     return isBesidesJumpingValid && !mustIJump ? true : false;
   }  
 
-  private checkTheRulesForQueen(queen: ChessPiece, horizontal: number, vertical: number): boolean {   
+  private isQueenMoveAllowed(queen: ChessPiece, horizontal: number, vertical: number): boolean {   
     const isBesidesJumpingValid: boolean = (horizontal !== 0 && vertical === 0) ||
                                          (horizontal === 0 && vertical !== 0) ||
                                          (Math.abs(horizontal) === Math.abs(vertical));
@@ -339,7 +342,7 @@ export class MoveService implements OnDestroy {
     return isBesidesJumpingValid && !mustIJump ? true : false;
   }  
 
-  private checkTheRulesForKing(king: ChessPiece, horizontal: number, vertical: number): boolean {    
+  private isKingMoveAllowed(king: ChessPiece, horizontal: number, vertical: number): boolean {    
     const isValidBasicMove: boolean = (Math.abs(horizontal) === 1 && Math.abs(vertical) === 0) ||
                                       (Math.abs(horizontal) === 0 && Math.abs(vertical) === 1) ||  
                                       (Math.abs(horizontal) === 1 && Math.abs(vertical) === 1);
@@ -347,8 +350,10 @@ export class MoveService implements OnDestroy {
     const mustIJump: boolean = this.mustIJump(king, horizontal, vertical);
 
     const someoneBlockingRook: ChessPiece = this.game.getChessPiece(this.field(1,king.isBlack ? 0 : 7))
-    const isValidCastlingLeft: boolean = (king.castlingLeftStatus !== CastlingStatus.NOT_ALLOWED && !someoneBlockingRook && horizontal === -2);
-    const isValidCastlingRight: boolean = (king.castlingRightStatus !== CastlingStatus.NOT_ALLOWED && horizontal === 2); 
+    const isValidCastlingLeft: boolean = (king.castlingLeftStatus !== CastlingStatus.NOT_ALLOWED &&
+                                         !king.isCheckMove && !someoneBlockingRook && horizontal === -2);
+    const isValidCastlingRight: boolean = (king.castlingRightStatus !== CastlingStatus.NOT_ALLOWED &&
+                                          !king.isCheckMove && horizontal === 2); 
 
     const verdict: boolean = (isValidBasicMove || isValidCastlingLeft || isValidCastlingRight) && !mustIJump;
 
@@ -371,7 +376,7 @@ export class MoveService implements OnDestroy {
     return verdict;
   }  
 
-  private checkTheRulesForPawn(pawn: ChessPiece, horizontal: number, vertical: number): boolean {   
+  private isPawnMoveAllowed(pawn: ChessPiece, horizontal: number, vertical: number): boolean {   
     const isDirectionValid: boolean = pawn.isBlack ? Math.sign(vertical) === 1 : Math.sign(vertical) === -1; 
 
     const chessPieceToBeRemoved = this.game.getChessPiece(this.field(pawn.to.x,pawn.to.y));
