@@ -12,6 +12,7 @@ export class BoardComponent implements OnDestroy{
   private validMove$ = this.move.validMove$;
   private resetValidMove$ = this.move.resetValidMove$;
   private checkMove$ = this.move.checkMove$;
+  private resetCheckMove$ = this.move.resetCheckMove$;
   
   public fields: Field[] = this.createFieldArray();
   
@@ -26,14 +27,16 @@ export class BoardComponent implements OnDestroy{
       if(this.fields[move]) {
         this.fields[move].isValidMove = false;
       }  
-
-      this.fields.forEach(field => field.isCheckMove = false);
     });
 
     this.checkMove$.subscribe(move => {
       if(this.fields[move]) {
         this.fields[move].isCheckMove = true;        
       }  
+    });
+
+    this.resetCheckMove$.subscribe(move => {
+      this.fields.forEach(field => field.isCheckMove = false);
     });
   }  
 
@@ -90,7 +93,7 @@ export class BoardComponent implements OnDestroy{
   public onDragMoved(event: any, field: number) {
     const movingChessPiece: ChessPiece = this.move.checkTheRules(event, field, true);
 
-    if(movingChessPiece) {
+    if(movingChessPiece && !this.move.doIPutMyselfInCheck(movingChessPiece)) {
       this.move.showValidMove(movingChessPiece.to);
     }  
   }
@@ -98,7 +101,8 @@ export class BoardComponent implements OnDestroy{
   public onDragEnded(event: any, field: number) {
     const movingChessPiece: ChessPiece = this.move.checkTheRules(event, field, false);
 
-    if(movingChessPiece) {
+    if(movingChessPiece && !this.move.doIPutMyselfInCheck(movingChessPiece)) {
+      this.move.resetCheckMove();
       this.move.moveChessPiece(movingChessPiece);      
     } 
     
