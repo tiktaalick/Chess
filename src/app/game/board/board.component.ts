@@ -2,6 +2,7 @@ import { MoveService } from './../services/move.service';
 import { GameService } from '../services/game.service';
 import { Component, OnDestroy } from '@angular/core';
 import { Field, ChessPiece } from '../interfaces';
+import * as _ from 'lodash';
 
 @Component({
   selector: 'app-board',
@@ -93,15 +94,17 @@ export class BoardComponent implements OnDestroy{
   public onDragMoved(event: any, field: number) {
     const movingChessPiece: ChessPiece = this.move.checkTheRules(event, field, true);
 
-    if(movingChessPiece && !this.move.doIPutMyselfInCheck(movingChessPiece)) {
+    if(movingChessPiece && !this.move.doIPutMyselfInCheck(_.cloneDeep(this.game.chessPieces), movingChessPiece, true)) {
       this.move.showValidMove(movingChessPiece.to);
+      this.move.resetCheckMove();
     }  
+
   }
 
   public onDragEnded(event: any, field: number) {
     const movingChessPiece: ChessPiece = this.move.checkTheRules(event, field, false);
 
-    if(movingChessPiece && !this.move.doIPutMyselfInCheck(movingChessPiece)) {
+    if(movingChessPiece && !this.move.doIPutMyselfInCheck(_.cloneDeep(this.game.chessPieces), movingChessPiece, true)) {
       this.move.resetCheckMove();
       this.move.moveChessPiece(movingChessPiece);      
     } 

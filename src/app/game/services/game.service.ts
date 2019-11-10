@@ -3,7 +3,9 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { ChessPiece, Coordinates } from '../interfaces';
 
-@Injectable()
+@Injectable({
+  providedIn: 'root'
+})
 export class GameService implements OnDestroy {
   public chessPieces$: BehaviorSubject<ChessPiece[]> = this.initializeChessPieces$();
   public chessPieces: ChessPiece[];
@@ -81,7 +83,7 @@ export class GameService implements OnDestroy {
       id: id,
       type: type,
       isBlack: isBlack,
-      isCheckMove: false,
+      isUnderAttack: false,
       from: {x: coordinates.x, y: coordinates.y},
       to: {x: coordinates.x, y: coordinates.y},
       myTurn: false,

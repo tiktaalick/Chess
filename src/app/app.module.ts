@@ -23,7 +23,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
     BrowserAnimationsModule,
     DragDropModule
   ],
-  providers: [GameService, MoveService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }
