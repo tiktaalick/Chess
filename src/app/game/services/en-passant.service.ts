@@ -1,3 +1,5 @@
+import { TurnPhase } from './../constants';
+import { ChessBoard } from './../interfaces';
 import { ChessPiece } from '../interfaces';
 import { GameService } from './game.service';
 import { Injectable } from '@angular/core';
@@ -8,17 +10,15 @@ import { EnPassantStatus, ChessPieceType } from '../constants';
   providedIn: 'root'
 })
 export class EnPassantService {
-  private field(x: number, y: number): number {
-    return x + 8 * y;
-  }
 
   constructor(private game: GameService) { }
 
-  public handleEnPassant(movingChessPiece: ChessPiece): ChessPiece {
-    let localChessPieces = _.cloneDeep(this.game.chessPieces); 
-    let chessPieceToBeRemovedEnPassent: ChessPiece = localChessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ABOUT_TO_BE_KICKED_OFF);
+  public handleEnPassant(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessPiece {
+    console.log('handleEnPassant: ' + chessBoard.turnPhase);
+
+    let chessPieceToBeRemovedEnPassent: ChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ABOUT_TO_BE_KICKED_OFF);
     
-    let resetEnPassent: ChessPiece = localChessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ALLOWED);
+    let resetEnPassent: ChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ALLOWED);
     if (resetEnPassent) {
       resetEnPassent.enPassantStatus = EnPassantStatus.NOT_ALLOWED;
     }
@@ -31,8 +31,8 @@ export class EnPassantService {
     return chessPieceToBeRemovedEnPassent;
   }
 
-  public canIKickSomeoneOffTheBoardEnPassant(pawn:ChessPiece, horizontal: number, vertical: number): ChessPiece {
-    const chessPieceToBeRemovedEnPassant = this.game.getChessPiece(this.field(pawn.to.x,pawn.to.y-Math.sign(vertical)));
+  public canIKickSomeoneOffTheBoardEnPassant(chessBoard: ChessBoard, pawn:ChessPiece, horizontal: number, vertical: number): ChessPiece {
+    const chessPieceToBeRemovedEnPassant = this.game.getChessPiece(chessBoard, this.game.field(pawn.to.x,pawn.to.y-Math.sign(vertical)));
 
      if (chessPieceToBeRemovedEnPassant && 
       chessPieceToBeRemovedEnPassant.enPassantStatus !== EnPassantStatus.NOT_ALLOWED && 

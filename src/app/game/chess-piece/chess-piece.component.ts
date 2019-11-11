@@ -1,12 +1,11 @@
-import { ChessPieceType } from './../constants';
 import { TILE_SIZE } from '../constants';
 import { Component, Input } from '@angular/core';
 import { ChessPiece } from '../interfaces';
 
 @Component({
   selector: 'app-chess-piece',
-  templateUrl: './chess.piece.component.html',
-  styleUrls: ['./chess.piece.component.scss']
+  templateUrl: './chess-piece.component.html',
+  styleUrls: ['./chess-piece.component.scss']
 })
 export class ChessPieceComponent {
   @Input() chessPiece: ChessPiece;

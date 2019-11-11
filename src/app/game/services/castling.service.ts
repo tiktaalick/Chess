@@ -1,4 +1,4 @@
-import { ChessPiece } from './../interfaces';
+import { ChessPiece, ChessBoard } from './../interfaces';
 import { GameService } from './game.service';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
@@ -11,8 +11,10 @@ export class CastlingService {
 
   constructor(private game: GameService) { }
 
-  private castleRook(localChessPieces: ChessPiece[], king: ChessPiece, castleLeft: boolean): ChessPiece {
-    let rookToCastle: ChessPiece = localChessPieces.find(
+  private castleRook(chessBoard: ChessBoard, king: ChessPiece, castleLeft: boolean): ChessPiece {
+    console.log('castleRook: ' + chessBoard.turnPhase);
+
+    let rookToCastle: ChessPiece = chessBoard.chessPieces.find(
       chessPiece => chessPiece.type === ChessPieceType.ROOK && 
                     chessPiece.isBlack === king.isBlack &&
                     (castleLeft 
@@ -20,12 +22,12 @@ export class CastlingService {
                       : chessPiece.castlingRightStatus === CastlingStatus.ALLOWED));      
     rookToCastle.to.x = castleLeft ? rookToCastle.from.x + 3 : rookToCastle.from.x - 2;
     return rookToCastle;
-    // this.moveChessPiece(rookToCastle);
-    // this.isBlackMove$.next(!this.isBlackMove$.getValue());
   }
 
-  private dontCastleKing(localChessPieces: ChessPiece[], rookToCastle: ChessPiece, castleLeft: boolean): ChessPiece {
-  const king: ChessPiece = localChessPieces.find(
+  private dontCastleKing(chessBoard: ChessBoard, rookToCastle: ChessPiece, castleLeft: boolean): ChessPiece {
+    console.log('dontCastleKing: ' + chessBoard.turnPhase);
+
+    const king: ChessPiece = chessBoard.chessPieces.find(
     chessPiece => chessPiece.type === ChessPieceType.KING && 
                     chessPiece.isBlack === rookToCastle.isBlack); 
     king.castlingLeftStatus = castleLeft 
@@ -37,24 +39,26 @@ export class CastlingService {
     return king;
   }
 
-  public handleCastling(localChessPieces: ChessPiece[], movingChessPiece: ChessPiece): ChessPiece[] {
+  public handleCastling(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessPiece[] {
+    console.log('handleCastling: ' + chessBoard.turnPhase);
+
     let kingNotToCastle: ChessPiece;
     let rookToCastle: ChessPiece;
-    
+
     if (movingChessPiece.type === ChessPieceType.KING && movingChessPiece.castlingLeftStatus === CastlingStatus.ABOUT_TO_CASTLE) {
-      rookToCastle = this.castleRook(localChessPieces, movingChessPiece, true);
+      rookToCastle = this.castleRook(chessBoard, movingChessPiece, true);
     } 
     
     if (movingChessPiece.type === ChessPieceType.KING && movingChessPiece.castlingRightStatus === CastlingStatus.ABOUT_TO_CASTLE) {
-      rookToCastle = this.castleRook(localChessPieces, movingChessPiece, false);
+      rookToCastle = this.castleRook(chessBoard, movingChessPiece, false);
     }
 
     if (movingChessPiece.type === ChessPieceType.ROOK && movingChessPiece.castlingLeftStatus === CastlingStatus.ALLOWED) {
-      kingNotToCastle = this.dontCastleKing(localChessPieces, movingChessPiece, true);
+      kingNotToCastle = this.dontCastleKing(chessBoard, movingChessPiece, true);
     }
 
     if (movingChessPiece.type === ChessPieceType.ROOK && movingChessPiece.castlingRightStatus === CastlingStatus.ALLOWED) {
-      kingNotToCastle = this.dontCastleKing(localChessPieces, movingChessPiece, false);
+      kingNotToCastle = this.dontCastleKing(chessBoard, movingChessPiece, false);
     }
 
     if([ChessPieceType.KING, ChessPieceType.ROOK].indexOf(movingChessPiece.type) > -1) {
@@ -68,6 +72,4 @@ export class CastlingService {
     
     return kingAndRook;
   }
-
-
 }

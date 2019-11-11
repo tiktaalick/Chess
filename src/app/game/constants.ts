@@ -45,6 +45,8 @@ export const CastlingStatus = {
 
 export const TurnPhase = {
     PLAYER_SWITCH: 'There is a new active player.',
+    PLAYER_DRAG: 'The active player drags a piece.',
+    PLAYER_DRAG_ENDED: 'The active player has ended dragging a piece.',
     PLAYER_MOVE: 'The active player makes a move.',
     PLAYER_CASTLE: 'The active player castles.',
     PLAYER_CHECK: 'Checking if the active player has put himself in check.',

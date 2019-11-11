@@ -1,4 +1,3 @@
-import { TurnPhase } from './constants';
 export interface ChessPiece {
   id: number;
   type: string;
@@ -27,4 +26,3 @@ export interface Field {
   isValidMove: boolean;
   isCheckMove: boolean;
 }
-
