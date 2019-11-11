@@ -5,6 +5,7 @@ import { Injectable, OnDestroy } from '@angular/core';
 import { GameService } from './game.service';
 import { BehaviorSubject } from 'rxjs';
 import { EnPassantService } from './enpassant.service';
+import { CastlingService } from './castling.service';
 
 @Injectable({
   providedIn: 'root'
@@ -20,7 +21,7 @@ export class MoveService implements OnDestroy {
     return x + 8 * y;
   }
 
-  constructor(private game: GameService, private enPassant: EnPassantService) { 
+  constructor(private game: GameService, private enPassant: EnPassantService, private castling: CastlingService) { 
     this.isBlackMove$.subscribe(isBlackMove => {
       this.game.chessPieces.forEach(movingChessPiece => {
         movingChessPiece.myTurn = movingChessPiece.isBlack === isBlackMove;
@@ -57,57 +58,6 @@ export class MoveService implements OnDestroy {
       }
     }
     return localChessPieces;
-  }
-
-  private castleRook(king: ChessPiece, castleLeft: boolean) {
-    let localChessPieces = _.cloneDeep(this.game.chessPieces); 
-    let rookToCastle: ChessPiece = localChessPieces.find(
-      chessPiece => chessPiece.type === ChessPieceType.ROOK && 
-                    chessPiece.isBlack === king.isBlack &&
-                    (castleLeft 
-                      ? chessPiece.castlingLeftStatus === CastlingStatus.ALLOWED 
-                      : chessPiece.castlingRightStatus === CastlingStatus.ALLOWED));      
-    rookToCastle.to.x = castleLeft ? rookToCastle.from.x + 3 : rookToCastle.from.x - 2;
-    this.moveChessPiece(rookToCastle);
-    this.isBlackMove$.next(!this.isBlackMove$.getValue());
-  }
-
-  private dontCastleKing(rookToCastle: ChessPiece, castleLeft: boolean) {
-    let localChessPieces = _.cloneDeep(this.game.chessPieces); 
-    const index: number = localChessPieces.findIndex(
-      chessPiece => chessPiece.type === ChessPieceType.KING && 
-                    chessPiece.isBlack === rookToCastle.isBlack); 
-    localChessPieces[index].castlingLeftStatus = castleLeft 
-                    ? CastlingStatus.NOT_ALLOWED 
-                    : localChessPieces[index].castlingLeftStatus;
-    localChessPieces[index].castlingRightStatus = castleLeft 
-                    ? localChessPieces[index].castlingRightStatus 
-                    : CastlingStatus.NOT_ALLOWED;
-  }
-
-  private handleCastling(movingChessPiece: ChessPiece): ChessPiece {
-    if (movingChessPiece.type === ChessPieceType.KING && movingChessPiece.castlingLeftStatus === CastlingStatus.ABOUT_TO_CASTLE) {
-      this.castleRook(movingChessPiece, true);
-    } 
-    
-    if (movingChessPiece.type === ChessPieceType.KING && movingChessPiece.castlingRightStatus === CastlingStatus.ABOUT_TO_CASTLE) {
-      this.castleRook(movingChessPiece, false);
-    }
-
-    if (movingChessPiece.type === ChessPieceType.ROOK && movingChessPiece.castlingLeftStatus === CastlingStatus.ALLOWED) {
-      this.dontCastleKing(movingChessPiece, true);
-    }
-
-    if (movingChessPiece.type === ChessPieceType.ROOK && movingChessPiece.castlingRightStatus === CastlingStatus.ALLOWED) {
-      this.dontCastleKing(movingChessPiece, false);
-    }
-
-    if([ChessPieceType.KING, ChessPieceType.ROOK].indexOf(movingChessPiece.type) > -1) {
-      movingChessPiece.castlingLeftStatus = CastlingStatus.NOT_ALLOWED;
-      movingChessPiece.castlingRightStatus = CastlingStatus.NOT_ALLOWED;
-    }     
-    
-    return movingChessPiece;
   }
 
   private promotePawn(movingChessPiece: ChessPiece): ChessPiece {
@@ -199,7 +149,22 @@ export class MoveService implements OnDestroy {
     
     let chessPieceToBeRemoved: ChessPiece = this.enPassant.handleEnPassant(localMovingChessPiece);
     localChessPieces = this.removeChessPiece(localChessPieces, chessPieceToBeRemoved);
-    localMovingChessPiece = this.handleCastling(localMovingChessPiece);
+    
+    // Handle castling
+    const kingAndRook: ChessPiece[] = this.castling.handleCastling(localChessPieces, localMovingChessPiece);
+    localMovingChessPiece = kingAndRook[0];
+    let index = localChessPieces.indexOf(kingAndRook[1]);
+    if (index > -1) {
+      localChessPieces[index] = kingAndRook[1];
+    }
+    index = localChessPieces.indexOf(kingAndRook[2]);
+    if (index > -1) {
+      //debugger
+      localChessPieces[index] = kingAndRook[2];
+      localChessPieces[index].from.x = localChessPieces[index].to.x;
+      localChessPieces[index].from.y = localChessPieces[index].to.y;
+    }
+    
     localMovingChessPiece = this.promotePawn(localMovingChessPiece);
 
     const to: number = this.field(localMovingChessPiece.to.x,localMovingChessPiece.to.y);
