@@ -1,4 +1,4 @@
-import { ChessPiece } from './../interfaces';
+import { ChessPiece } from '../interfaces';
 import { GameService } from './game.service';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';

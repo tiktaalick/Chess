@@ -1,10 +1,11 @@
+import { PromotePawnService } from './promote-pawn.service';
 import { ChessPiece, Coordinates } from '../interfaces';
 import { CastlingStatus, TILE_SIZE, ChessPieceType, EnPassantStatus } from '../constants';
 import * as _ from 'lodash';
 import { Injectable, OnDestroy } from '@angular/core';
 import { GameService } from './game.service';
 import { BehaviorSubject } from 'rxjs';
-import { EnPassantService } from './enpassant.service';
+import { EnPassantService } from './en-passant.service';
 import { CastlingService } from './castling.service';
 
 @Injectable({
@@ -21,7 +22,11 @@ export class MoveService implements OnDestroy {
     return x + 8 * y;
   }
 
-  constructor(private game: GameService, private enPassant: EnPassantService, private castling: CastlingService) { 
+  constructor(
+    private game: GameService, 
+    private enPassant: EnPassantService, 
+    private castling: CastlingService, 
+    private promote: PromotePawnService) { 
     this.isBlackMove$.subscribe(isBlackMove => {
       this.game.chessPieces.forEach(movingChessPiece => {
         movingChessPiece.myTurn = movingChessPiece.isBlack === isBlackMove;
@@ -58,14 +63,6 @@ export class MoveService implements OnDestroy {
       }
     }
     return localChessPieces;
-  }
-
-  private promotePawn(movingChessPiece: ChessPiece): ChessPiece {
-    if (movingChessPiece.type === ChessPieceType.PAWN && [0,7].indexOf(movingChessPiece.to.y) > -1) {
-      movingChessPiece.type = ChessPieceType.QUEEN;
-    }
-    
-    return movingChessPiece;
   }
 
   private handleCheck(isBlack: boolean, localChessPieces: ChessPiece[], ignorePiecesUnderAttack: boolean): ChessPiece {
@@ -142,7 +139,7 @@ export class MoveService implements OnDestroy {
       console.log('isBlack='+isBlack+': no more moves');
     }
   }
-  
+
   public moveChessPiece(movingChessPiece: ChessPiece) { 
     let localChessPieces = _.cloneDeep(this.game.chessPieces); 
     let localMovingChessPiece = localChessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id);
@@ -165,7 +162,7 @@ export class MoveService implements OnDestroy {
       localChessPieces[index].from.y = localChessPieces[index].to.y;
     }
     
-    localMovingChessPiece = this.promotePawn(localMovingChessPiece);
+    localMovingChessPiece = this.promote.promotePawn(localMovingChessPiece);
 
     const to: number = this.field(localMovingChessPiece.to.x,localMovingChessPiece.to.y);
     chessPieceToBeRemoved = this.game.getChessPiece(to);    
