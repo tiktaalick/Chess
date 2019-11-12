@@ -15,7 +15,7 @@ export class CheckService {
 
   constructor(private game: GameService, private rules: RulesService) { }
 
-  public handleCheck(isBlack: boolean, chessBoard: ChessBoard, ignorePiecesUnderAttack: boolean): ChessPiece {
+  public handleCheck(isBlack: boolean, chessBoard: ChessBoard): ChessPiece {
     console.log('handleCheck: ' + chessBoard.turnPhase);
 
     let king: ChessPiece = chessBoard.chessPieces.find(
@@ -26,15 +26,6 @@ export class CheckService {
 
     let isCheck: boolean = false;
     let checkPiece: ChessPiece;
-
-    if (ignorePiecesUnderAttack) {
-      chessBoard.chessPieces.forEach(chessPiece => {
-        if (chessPiece.isUnderAttack && chessPiece.isBlack != isBlack) {
-          let index: number = chessBoard.chessPieces.indexOf(chessPiece);
-          chessBoard.chessPieces.splice(index,1);
-        }
-      })
-    };
 
     for (let x = 1; x < chessBoard.chessPieces.length; x++) {
       let chessPiece: ChessPiece = chessBoard.chessPieces[x];
@@ -64,7 +55,7 @@ export class CheckService {
     return checkPiece;
   }
 
-  public doIPutMyselfInCheck(chessBoard: ChessBoard, movingChessPiece: ChessPiece, checkForNoMoreMoves: boolean) {
+  public doIPutMyselfInCheck(chessBoard: ChessBoard, movingChessPiece: ChessPiece) {
     chessBoard = this.game.cloneChessBoard(chessBoard,TurnPhase.PLAYER_CHECK);
     
     let localMovingChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id);    
@@ -74,7 +65,7 @@ export class CheckService {
     localMovingChessPiece.to.x = movingChessPiece.to.x;
     localMovingChessPiece.to.y = movingChessPiece.to.y;
 
-    const checkPiece: ChessPiece = this.handleCheck(localMovingChessPiece.isBlack, chessBoard, checkForNoMoreMoves);
+    const checkPiece: ChessPiece = this.handleCheck(localMovingChessPiece.isBlack, chessBoard);
 
     return checkPiece;
   }
@@ -87,4 +78,16 @@ export class CheckService {
   public resetCheckMove() {
     this.resetCheckMove$.next(!this.resetCheckMove);
   }
+
+  public checkTheRules(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessPiece {
+    const isMoveAllowed: boolean = this.rules.isMoveAllowed(chessBoard, movingChessPiece);
+    this.resetCheckMove();
+    const checkPiece: ChessPiece = this.doIPutMyselfInCheck(chessBoard, movingChessPiece);
+    if (isMoveAllowed && !checkPiece) {
+      return movingChessPiece;
+    }
+
+    return null;
+  }
+
 }

@@ -1,9 +1,8 @@
-import { TurnPhase } from './../constants';
 import { ChessBoard } from './../interfaces';
 import { GameService } from './game.service';
 import { Injectable } from '@angular/core';
 import { ChessPiece, Coordinates } from '../interfaces';
-import { ChessPieceType, CastlingStatus, EnPassantStatus } from '../constants';
+import { ChessPieceType, CastlingStatus, EnPassantStatus, TurnPhase } from '../constants';
 import { EnPassantService } from './en-passant.service';
 
 @Injectable({
@@ -13,9 +12,7 @@ export class RulesService {
 
   constructor(private game: GameService, private enPassant: EnPassantService) { }
 
-  public handleEnPassant(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessPiece {
-    console.log('handleEnPassant: ' + chessBoard.turnPhase);
-
+    public handleEnPassant(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessBoard {
     return this.enPassant.handleEnPassant(chessBoard, movingChessPiece);
   }
 
@@ -64,6 +61,12 @@ export class RulesService {
       chessPieceToBeRemoved.isUnderAttack = true;
       console.log((chessPieceToBeRemoved.isBlack ? 'Black ' : 'White ') + 
         chessPieceToBeRemoved.type+'('+chessPieceToBeRemoved.from.x+','+chessPieceToBeRemoved.from.y+') is under attack!');
+      if (chessPieceToBeRemoved.type !== ChessPieceType.KING) {
+        console.log((chessPieceToBeRemoved.isBlack ? 'Black ' : 'White ') + 
+          chessPieceToBeRemoved.type+'('+chessPieceToBeRemoved.from.x+','+chessPieceToBeRemoved.from.y+') has been removed from the board!');
+        const index = chessBoard.chessPieces.findIndex(chessPiece => chessPiece.id === chessPieceToBeRemoved.id);
+        chessBoard.chessPieces.splice(index,1);
+      }
     }
 
     return isMoveAllowed;
@@ -133,9 +136,10 @@ export class RulesService {
 
     const someoneBlockingRook: ChessPiece = this.game.getChessPiece(chessBoard, this.game.field(1,king.isBlack ? 0 : 7))
     const isValidCastlingLeft: boolean = (king.castlingLeftStatus !== CastlingStatus.NOT_ALLOWED &&
-                                         !king.isUnderAttack && !someoneBlockingRook && horizontal === -2);
+                                         !king.isUnderAttack && !someoneBlockingRook && 
+                                         horizontal === -2 && vertical === 0);
     const isValidCastlingRight: boolean = (king.castlingRightStatus !== CastlingStatus.NOT_ALLOWED &&
-                                          !king.isUnderAttack && horizontal === 2); 
+                                          !king.isUnderAttack && horizontal === 2 && vertical === 0); 
 
     const verdict: boolean = (isValidBasicMove || isValidCastlingLeft || isValidCastlingRight) && !mustIJump;
 

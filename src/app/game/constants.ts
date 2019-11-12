@@ -48,7 +48,6 @@ export const TurnPhase = {
     PLAYER_DRAG: 'The active player drags a piece.',
     PLAYER_DRAG_ENDED: 'The active player has ended dragging a piece.',
     PLAYER_MOVE: 'The active player makes a move.',
-    PLAYER_CASTLE: 'The active player castles.',
     PLAYER_CHECK: 'Checking if the active player has put himself in check.',
     OTHER_CHECK: 'Checking if the other player has been put in check.',
     OTHER_MOVES: 'Checking if the other player is still able to make a move.'    

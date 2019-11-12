@@ -103,7 +103,7 @@ export class BoardComponent implements OnDestroy{
 
   public onDragMoved(event: CdkDragMove, field: number) {
     let chessBoard: ChessBoard = this.game.cloneChessBoard(this.game.chessBoard, TurnPhase.PLAYER_DRAG);
-    const movingChessPiece: ChessPiece = this.move.checkTheRules(chessBoard, event, field, true, false);
+    const movingChessPiece: ChessPiece = this.move.checkTheRulesForActivePlayer(chessBoard, event, field, true, false);
 
     if(movingChessPiece) {
       this.move.showValidMove(movingChessPiece.to);
@@ -113,13 +113,13 @@ export class BoardComponent implements OnDestroy{
 
   public onDragEnded(event: CdkDragEnd, field: number) {
     let chessBoard: ChessBoard = this.game.cloneChessBoard(this.game.chessBoard, TurnPhase.PLAYER_DRAG_ENDED);
-    const movingChessPiece: ChessPiece = this.move.checkTheRules(chessBoard, event, field, false, false);
+    const movingChessPiece: ChessPiece = this.move.checkTheRulesForActivePlayer(chessBoard, event, field, false, false);
     
     if(movingChessPiece) {
-      this.move.moveChessPiece(movingChessPiece);      
+      this.move.moveChessPiece(chessBoard,movingChessPiece);      
     } else {
       console.log('Setting dragging distance to zero')
-      this.move.checkTheRules(chessBoard, event, field, false, true);
+      this.move.checkTheRulesForActivePlayer(chessBoard, event, field, false, true);
     }
 
     event.source.reset();
