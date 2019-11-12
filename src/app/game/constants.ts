@@ -43,5 +43,15 @@ export const CastlingStatus = {
     ABOUT_TO_CASTLE: 'about to castle'
 }
 
+export const TurnPhase = {
+    PLAYER_SWITCH: 'There is a new active player.',
+    PLAYER_DRAG: 'The active player drags a piece.',
+    PLAYER_DRAG_ENDED: 'The active player has ended dragging a piece.',
+    PLAYER_MOVE: 'The active player makes a move.',
+    PLAYER_CHECK: 'Checking if the active player has put himself in check.',
+    OTHER_CHECK: 'Checking if the other player has been put in check.',
+    OTHER_MOVES: 'Checking if the other player is still able to make a move.'    
+}
+
 export const TILE_SIZE = 70;
 

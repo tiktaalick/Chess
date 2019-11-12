@@ -2,13 +2,18 @@ export interface ChessPiece {
   id: number;
   type: string;
   isBlack: boolean; 
-  isCheckMove: boolean;
+  isUnderAttack: boolean;
   from: Coordinates;
   to: Coordinates;
   myTurn: boolean;
   enPassantStatus: string;
   castlingLeftStatus: string;
   castlingRightStatus: string;
+}
+
+export interface ChessBoard {
+  turnPhase: string;
+  chessPieces: ChessPiece[]
 }
 
 export interface Coordinates {
@@ -21,4 +26,3 @@ export interface Field {
   isValidMove: boolean;
   isCheckMove: boolean;
 }
-
