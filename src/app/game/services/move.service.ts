@@ -181,10 +181,15 @@ export class MoveService implements OnDestroy {
     return this.check.doIPutMyselfInCheck(chessBoard, movingChessPiece, checkForNoMoreMoves);
   }
 
-  public checkTheRules(chessBoard: ChessBoard, event: any, field: number, whileDragging: boolean): ChessPiece {
+  public checkTheRules(chessBoard: ChessBoard, event: any, field: number, whileDragging: boolean, resetDragging: boolean): ChessPiece {
     const movingChessPiece: ChessPiece = this.game.getChessPiece(chessBoard, field);
-    movingChessPiece.to.x = this.getNewPosition(event).x;
-    movingChessPiece.to.y = this.getNewPosition(event).y;
+    if (resetDragging) {
+      movingChessPiece.to.x = movingChessPiece.from.x;
+      movingChessPiece.to.y = movingChessPiece.from.y;
+    } else {
+      movingChessPiece.to.x = this.getNewPosition(event).x;
+      movingChessPiece.to.y = this.getNewPosition(event).y;
+    }
     console.log('('+movingChessPiece.from.x+','+movingChessPiece.from.y+') => ('+movingChessPiece.to.x+','+movingChessPiece.to.y+')');
     
     const doPerformChecks: boolean = this.doPerformChecks(movingChessPiece, whileDragging); 
