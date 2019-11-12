@@ -19,6 +19,7 @@ export class MoveService implements OnDestroy {
   public resetValidMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
   public checkMove$ = this.check.checkMove$;
   public resetCheckMove$ = this.check.resetCheckMove$;
+  public playerHasLost$ = this.noMoreMoves.playerHasLost$;
   public isBlackMove$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
   private dragPosition: Coordinates = this.resetDragPosition();
 

@@ -17,7 +17,7 @@ export class BoardComponent implements OnDestroy{
   private resetValidMove$ = this.move.resetValidMove$;
   private checkMove$ = this.move.checkMove$;
   private resetCheckMove$ = this.move.resetCheckMove$;
-  
+  private playerHasLost$ = this.move.playerHasLost$;  
   public fields: Field[] = this.createFieldArray();
   
   constructor(
@@ -49,11 +49,20 @@ export class BoardComponent implements OnDestroy{
     this.resetCheckMove$.subscribe(move => {
       this.fields.forEach(field => field.isCheckMove = false);
     });
+
+    this.playerHasLost$.subscribe(move => {
+      if(this.fields[move]) {
+        this.fields[move].playerHasLost = true;
+      }  
+    });
   }  
 
   ngOnDestroy(): void {
     this.validMove$.unsubscribe();
     this.resetValidMove$.unsubscribe();
+    this.checkMove$.unsubscribe();
+    this.resetCheckMove$.unsubscribe();
+    this.playerHasLost$.unsubscribe();
   }
 
   private createFieldArray(): Field[] {
@@ -62,7 +71,8 @@ export class BoardComponent implements OnDestroy{
       const field: Field = {
         number: i,
         isValidMove: false,
-        isCheckMove: false
+        isCheckMove: false,
+        playerHasLost: false
       };
       fields.push(field);
     }    

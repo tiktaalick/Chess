@@ -25,4 +25,5 @@ export interface Field {
   number: number;
   isValidMove: boolean;
   isCheckMove: boolean;
+  playerHasLost: boolean;
 }

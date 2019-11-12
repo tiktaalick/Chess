@@ -1,14 +1,17 @@
+import { ChessPieceType } from './../constants';
+import { ChessBoard, ChessPiece, Coordinates } from '../interfaces';
 import { CheckService } from './check.service';
 import { RulesService } from './rules.service';
 import { GameService } from './game.service';
 import { Injectable } from '@angular/core';
-import { ChessBoard, ChessPiece } from '../interfaces';
 import { TurnPhase } from '../constants';
+import { BehaviorSubject } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class NoMoreMovesService {
+  public playerHasLost$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
 
   constructor(private game: GameService, private rules: RulesService, private check: CheckService) { }
 
@@ -49,6 +52,16 @@ export class NoMoreMovesService {
 
     if (!isValidMoveFound) {
       console.log('isBlack='+isBlack+': no more moves');
+      let king: ChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.isBlack === isBlack && chessPiece.type === ChessPieceType.KING);
+      this.showPlayerHasLost({x: king.from.x, y: king.from.y});      
     }
   }
+
+    private showPlayerHasLost(coordinates: Coordinates) {
+    console.log('showCheckMove: ('+coordinates.x+','+coordinates.y+')');
+    this.playerHasLost$.next(this.game.field(coordinates.x,coordinates.y));
+  }
+
+
+
 }

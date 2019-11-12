@@ -1,4 +1,4 @@
-import { DarkerTile, LighterTile, ValidMove, CheckMove } from '../../constants';
+import { DarkerTile, LighterTile, ValidMove, CheckMove, PlayerHasLost } from '../../constants';
 import { Component, OnInit, Input } from '@angular/core';
 
 @Component({
@@ -10,6 +10,7 @@ export class SquareComponent {
   @Input() darkerTile: boolean;
   @Input() isValidMove: boolean;
   @Input() isCheckMove: boolean;
+  @Input() playerHasLost: boolean;
   @Input() field: number;
   @Input() x: number;
   @Input() y: number;
@@ -21,7 +22,9 @@ export class SquareComponent {
         ? { backgroundColor: "rgb("+DarkerTile.RED+","+DarkerTile.GREEN+","+DarkerTile.BLUE+")" }
         : { backgroundColor: "rgb("+LighterTile.RED+","+LighterTile.GREEN+","+LighterTile.BLUE+")" };
 
-    if (this.isValidMove) {
+    if (this.playerHasLost) {
+      style = { backgroundColor: "rgb("+PlayerHasLost.RED+","+PlayerHasLost.GREEN+","+PlayerHasLost.BLUE+")" };
+    } else if (this.isValidMove) {
       style = { backgroundColor: "rgb("+ValidMove.RED+","+ValidMove.GREEN+","+ValidMove.BLUE+")" };
     } else if (this.isCheckMove) {
       style = { backgroundColor: "rgb("+CheckMove.RED+","+CheckMove.GREEN+","+CheckMove.BLUE+")" };

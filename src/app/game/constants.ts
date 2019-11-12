@@ -31,6 +31,12 @@ export const CheckMove = {
     BLUE: 0
 }
 
+export const PlayerHasLost = {
+    RED: 150,
+    GREEN: 0,
+    BLUE: 0
+}
+
 export const EnPassantStatus = {
     ALLOWED: 'allowed',
     NOT_ALLOWED: 'not allowed',
