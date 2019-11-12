@@ -12,7 +12,7 @@ export class NoMoreMovesService {
 
   constructor(private game: GameService, private rules: RulesService, private check: CheckService) { }
 
-  public handleNoMoreMoves(chessBoard: ChessBoard, isBlack: boolean) {
+  public async handleNoMoreMoves(chessBoard: ChessBoard, isBlack: boolean): Promise<void> {
     chessBoard = this.game.cloneChessBoard(chessBoard,TurnPhase.OTHER_MOVES);
 
     console.log('handleNoMoreMoves: ' + chessBoard.turnPhase);
