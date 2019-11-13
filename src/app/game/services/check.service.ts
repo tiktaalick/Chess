@@ -30,7 +30,7 @@ export class CheckService {
     let isCheck: boolean = false;
     let checkPiece: ChessPiece;
 
-    for (let x = 1; x < chessBoard.chessPieces.length; x++) {
+    for (let x = 0; x < chessBoard.chessPieces.length; x++) {
       let chessPiece: ChessPiece = chessBoard.chessPieces[x];
 
       if (!isCheck && chessPiece.isBlack !== isBlack) { 
