@@ -62,6 +62,4 @@ export class NoMoreMovesService {
     this.playerHasLost$.next(this.chessBoard.field(coordinates.x,coordinates.y));
   }
 
-
-
 }

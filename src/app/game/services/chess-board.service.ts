@@ -49,6 +49,22 @@ export class ChessBoardService implements OnDestroy {
       chessPiece => chessPiece.from.x === fieldX && chessPiece.from.y === fieldY);    
   }
 
+  public updateChessPiece(chessBoard: ChessBoard, chessPiecetoBeUpdated: ChessPiece): ChessBoard {
+    const index: number = chessBoard.chessPieces.findIndex(chessPiece => chessPiece.id === chessPiecetoBeUpdated.id);
+    
+    chessBoard.chessPieces[index] = chessPiecetoBeUpdated;    
+
+    return chessBoard;
+  }
+
+  public removeChessPiece(chessBoard: ChessBoard, chessPieceToBeRemoved: ChessPiece): ChessBoard {
+    const index: number = chessBoard.chessPieces.findIndex(chessPiece => chessPiece.id === chessPieceToBeRemoved.id);
+    
+    chessBoard.chessPieces.splice(index,1);
+
+    return chessBoard;
+  }
+
   public hasAChessPieceOfType(chessBoard: ChessBoard, field: number, type: string): boolean {
     const chessPiece: ChessPiece = this.getChessPiece(chessBoard, field);
 

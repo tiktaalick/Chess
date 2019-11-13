@@ -64,8 +64,7 @@ export class RulesService {
       if (chessPieceToBeRemoved.type !== ChessPieceType.KING) {
         console.log((chessPieceToBeRemoved.isBlack ? 'Black ' : 'White ') + 
           chessPieceToBeRemoved.type+'('+chessPieceToBeRemoved.from.x+','+chessPieceToBeRemoved.from.y+') has been removed from the board!');
-        const index = chessBoard.chessPieces.findIndex(chessPiece => chessPiece.id === chessPieceToBeRemoved.id);
-        chessBoard.chessPieces.splice(index,1);
+        chessBoard = this.chessBoard.removeChessPiece(chessBoard, chessPieceToBeRemoved); 
       }
     }
 

@@ -11,7 +11,7 @@ export class CastlingService {
 
   constructor(private chessBoard: ChessBoardService) { }
 
-  public handleCastling(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessPiece[] {
+  public handleCastling(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessBoard {
     console.log('handleCastling: ' + chessBoard.turnPhase);
 
     let kingNotToCastle: ChessPiece;
@@ -38,11 +38,18 @@ export class CastlingService {
       movingChessPiece.castlingRightStatus = CastlingStatus.NOT_ALLOWED;
     }     
 
-    const kingAndRook: ChessPiece[] = [movingChessPiece];
-    kingAndRook[1] = kingNotToCastle;
-    kingAndRook[2] = rookToCastle;
-    
-    return kingAndRook;
+    let index = chessBoard.chessPieces.indexOf(kingNotToCastle);
+    if (index > -1) {
+      chessBoard.chessPieces[index] = kingNotToCastle;
+    }
+    index = chessBoard.chessPieces.indexOf(rookToCastle);
+    if (index > -1) {
+      chessBoard.chessPieces[index] = rookToCastle;
+      chessBoard.chessPieces[index].from.x = chessBoard.chessPieces[index].to.x;
+      chessBoard.chessPieces[index].from.y = chessBoard.chessPieces[index].to.y;
+    }
+
+    return chessBoard;
   }
 
   private castleRook(chessBoard: ChessBoard, king: ChessPiece, castleLeft: boolean): ChessPiece {

@@ -40,6 +40,40 @@ export class GameService implements OnDestroy {
     this.isBlackMove$.unsubscribe();
   }
 
+  public moveChessPiece(chessBoard: ChessBoard, movingChessPiece: ChessPiece) { 
+    chessBoard.turnPhase =TurnPhase.PLAYER_MOVE; 
+
+    chessBoard = this.rules.handleEnPassant(chessBoard, movingChessPiece);
+    chessBoard = this.castling.handleCastling(chessBoard, movingChessPiece);
+    chessBoard = this.promote.promotePawn(chessBoard, movingChessPiece);
+
+    chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id).from.x = movingChessPiece.to.x;
+    chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id).from.y = movingChessPiece.to.y;
+
+    this.chessBoard.chessBoard$.next(chessBoard);
+    this.noMoreMoves.handleNoMoreMoves(chessBoard, !movingChessPiece.isBlack);
+
+    chessBoard.chessPieces.forEach(chessPiece => chessPiece.isUnderAttack = false);
+
+    if (!this.check.handleCheck(chessBoard, TurnPhase.OTHER_CHECK, !movingChessPiece.isBlack)) {
+      this.check.resetCheckMove();
+    }
+
+    chessBoard.turnPhase = TurnPhase.PLAYER_SWITCH;
+
+    this.resetValidMove(this.dragPosition);
+    this.dragPosition = this.resetDragPosition();
+    this.isBlackMove$.next(!this.isBlackMove$.getValue());
+  }
+
+  public showValidMove(coordinates: Coordinates) {
+    this.validMove$.next(this.chessBoard.field(coordinates.x,coordinates.y));
+  }
+
+  private resetValidMove(coordinates: Coordinates) {
+    this.resetValidMove$.next(this.chessBoard.field(coordinates.x,coordinates.y));
+  }
+
   private hasMovedToAnotherField(dragPosition: Coordinates, newPosition: Coordinates): boolean {
     if(dragPosition.x == -1 && dragPosition.y == -1) {
       this.dragPosition.x = newPosition.x;
@@ -48,50 +82,6 @@ export class GameService implements OnDestroy {
     }
 
     return !(newPosition.x === dragPosition.x && newPosition.y === dragPosition.y);
-  }
-
-  public moveChessPiece(chessBoard: ChessBoard, movingChessPiece: ChessPiece) { 
-    chessBoard.turnPhase =TurnPhase.PLAYER_MOVE; 
-
-    chessBoard = this.rules.handleEnPassant(chessBoard, movingChessPiece);
-    
-    // Handle castling
-    const kingAndRook: ChessPiece[] = this.castling.handleCastling(chessBoard, movingChessPiece);
-    movingChessPiece = kingAndRook[0];
-    let index = chessBoard.chessPieces.indexOf(kingAndRook[1]);
-    if (index > -1) {
-      chessBoard.chessPieces[index] = kingAndRook[1];
-    }
-    index = chessBoard.chessPieces.indexOf(kingAndRook[2]);
-    if (index > -1) {
-      chessBoard.chessPieces[index] = kingAndRook[2];
-      chessBoard.chessPieces[index].from.x = chessBoard.chessPieces[index].to.x;
-      chessBoard.chessPieces[index].from.y = chessBoard.chessPieces[index].to.y;
-    }
-    
-    movingChessPiece = this.promote.promotePawn(movingChessPiece);
-
-    const to: number = this.chessBoard.field(movingChessPiece.to.x,movingChessPiece.to.y);
-    
-    chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id).from.x = movingChessPiece.to.x;
-    chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id).from.y = movingChessPiece.to.y;
-
-    this.chessBoard.chessBoard$.next(chessBoard);
-
-    chessBoard.chessPieces.forEach(chessPiece => chessPiece.isUnderAttack = false);
-    
-    this.noMoreMoves.handleNoMoreMoves(chessBoard, !movingChessPiece.isBlack);
-
-    chessBoard = this.chessBoard.cloneChessBoard(chessBoard, TurnPhase.OTHER_CHECK);
-    let checkPiece: ChessPiece = this.check.handleCheck(!movingChessPiece.isBlack, chessBoard);
-    chessBoard.turnPhase = TurnPhase.PLAYER_SWITCH;
-
-    if (!checkPiece) {
-      this.check.resetCheckMove();
-    }
-    this.resetValidMove(this.dragPosition);
-    this.dragPosition = this.resetDragPosition();
-    this.isBlackMove$.next(!this.isBlackMove$.getValue());
   }
 
   private doPerformChecks(movingChessPiece: ChessPiece, whileDragging: boolean): boolean {
@@ -131,14 +121,6 @@ export class GameService implements OnDestroy {
     return null;
   }
   
-  public showValidMove(coordinates: Coordinates) {
-    this.validMove$.next(this.chessBoard.field(coordinates.x,coordinates.y));
-  }
-
-  private resetValidMove(coordinates: Coordinates) {
-    this.resetValidMove$.next(this.chessBoard.field(coordinates.x,coordinates.y));
-  }
-
   private resetDragPosition(): Coordinates {
     return {x: -1, y: -1};
   }

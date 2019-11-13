@@ -1,9 +1,7 @@
-import { TurnPhase } from './../constants';
 import { ChessBoard } from './../interfaces';
 import { ChessPiece } from '../interfaces';
 import { ChessBoardService } from './chess-board.service';
 import { Injectable } from '@angular/core';
-import * as _ from 'lodash';
 import { EnPassantStatus, ChessPieceType } from '../constants';
 
 @Injectable({
@@ -16,7 +14,7 @@ export class EnPassantService {
   public handleEnPassant(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessBoard {
     console.log('handleEnPassant: ' + chessBoard.turnPhase);
 
-    let chessPieceToBeRemovedEnPassent: ChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ABOUT_TO_BE_KICKED_OFF);
+    let chessPieceToBeRemovedEnPassant: ChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ABOUT_TO_BE_KICKED_OFF);
     
     let resetEnPassant: ChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.enPassantStatus === EnPassantStatus.ALLOWED);
     if (resetEnPassant) {
@@ -25,14 +23,12 @@ export class EnPassantService {
 
     if (movingChessPiece.type === ChessPieceType.PAWN &&
         Math.abs(movingChessPiece.to.y - movingChessPiece.from.y) === 2) {
-          movingChessPiece.enPassantStatus = EnPassantStatus.ALLOWED;
-          const index: number = chessBoard.chessPieces.findIndex(chessPiece => chessPiece.id === movingChessPiece.id);
-          chessBoard.chessPieces[index] = movingChessPiece;    
+      movingChessPiece.enPassantStatus = EnPassantStatus.ALLOWED;
+      chessBoard = this.chessBoard.updateChessPiece(chessBoard, movingChessPiece);    
     } 
 
-    if (chessPieceToBeRemovedEnPassent) {
-      const index: number = chessBoard.chessPieces.findIndex(chessPiece => chessPiece.id === chessPieceToBeRemovedEnPassent.id);
-      chessBoard.chessPieces.splice(index,1);
+    if (chessPieceToBeRemovedEnPassant) {
+      chessBoard = this.chessBoard.removeChessPiece(chessBoard, chessPieceToBeRemovedEnPassant);    
     }
     
     return chessBoard;

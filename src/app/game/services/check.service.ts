@@ -1,3 +1,4 @@
+import { GameService } from './game.service';
 import { TurnPhase, ChessPieceType } from './../constants';
 import { ChessBoard } from './../interfaces';
 import { RulesService } from './rules.service';
@@ -15,7 +16,9 @@ export class CheckService {
 
   constructor(private chessBoard: ChessBoardService, private rules: RulesService) { }
 
-  public handleCheck(isBlack: boolean, chessBoard: ChessBoard): ChessPiece {
+  public handleCheck(chessBoard: ChessBoard, turnPhase: string, isBlack: boolean, ): ChessPiece {
+    chessBoard = this.chessBoard.cloneChessBoard(chessBoard, turnPhase);
+
     console.log('handleCheck: ' + chessBoard.turnPhase);
 
     let king: ChessPiece = chessBoard.chessPieces.find(
@@ -65,7 +68,7 @@ export class CheckService {
     localMovingChessPiece.to.x = movingChessPiece.to.x;
     localMovingChessPiece.to.y = movingChessPiece.to.y;
 
-    const checkPiece: ChessPiece = this.handleCheck(localMovingChessPiece.isBlack, chessBoard);
+    const checkPiece: ChessPiece = this.handleCheck(chessBoard, TurnPhase.PLAYER_CHECK, localMovingChessPiece.isBlack);
 
     return checkPiece;
   }
