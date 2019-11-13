@@ -1,5 +1,5 @@
 import { ChessBoard } from './../interfaces';
-import { GameService } from './game.service';
+import { ChessBoardService } from './chess-board.service';
 import { Injectable } from '@angular/core';
 import { ChessPiece, Coordinates } from '../interfaces';
 import { ChessPieceType, CastlingStatus, EnPassantStatus, TurnPhase } from '../constants';
@@ -10,7 +10,7 @@ import { EnPassantService } from './en-passant.service';
 })
 export class RulesService {
 
-  constructor(private game: GameService, private enPassant: EnPassantService) { }
+  constructor(private chessBoard: ChessBoardService, private enPassant: EnPassantService) { }
 
     public handleEnPassant(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessBoard {
     return this.enPassant.handleEnPassant(chessBoard, movingChessPiece);
@@ -22,7 +22,7 @@ export class RulesService {
 
     const horizontal = movingChessPiece.to.x - movingChessPiece.from.x; 
     const vertical = movingChessPiece.to.y - movingChessPiece.from.y;
-    const chessPieceToBeRemoved: ChessPiece = this.game.getChessPiece(chessBoard, this.game.field(movingChessPiece.to.x,movingChessPiece.to.y));
+    const chessPieceToBeRemoved: ChessPiece = this.chessBoard.getChessPiece(chessBoard, this.chessBoard.field(movingChessPiece.to.x,movingChessPiece.to.y));
     let isMoveAllowed: boolean = false;
 
     if (chessPieceToBeRemoved && chessPieceToBeRemoved.isBlack === movingChessPiece.isBlack) {
@@ -134,7 +134,7 @@ export class RulesService {
 
     const mustIJump: boolean = this.mustIJump(chessBoard, king, horizontal, vertical);
 
-    const someoneBlockingRook: ChessPiece = this.game.getChessPiece(chessBoard, this.game.field(1,king.isBlack ? 0 : 7))
+    const someoneBlockingRook: ChessPiece = this.chessBoard.getChessPiece(chessBoard, this.chessBoard.field(1,king.isBlack ? 0 : 7))
     const isValidCastlingLeft: boolean = (king.castlingLeftStatus !== CastlingStatus.NOT_ALLOWED &&
                                          !king.isUnderAttack && !someoneBlockingRook && 
                                          horizontal === -2 && vertical === 0);
@@ -165,7 +165,7 @@ export class RulesService {
   private isPawnMoveAllowed(chessBoard: ChessBoard, pawn: ChessPiece, horizontal: number, vertical: number): boolean {   
     const isDirectionValid: boolean = pawn.isBlack ? Math.sign(vertical) === 1 : Math.sign(vertical) === -1; 
 
-    const chessPieceToBeRemoved = this.game.getChessPiece(chessBoard, this.game.field(pawn.to.x,pawn.to.y));
+    const chessPieceToBeRemoved = this.chessBoard.getChessPiece(chessBoard, this.chessBoard.field(pawn.to.x,pawn.to.y));
     
     const isMoveBesidesJumpingValid: boolean = 
       (!chessPieceToBeRemoved && horizontal === 0 && Math.abs(vertical) === 1) ||

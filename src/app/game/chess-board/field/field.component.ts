@@ -1,12 +1,12 @@
 import { DarkerTile, LighterTile, ValidMove, CheckMove, PlayerHasLost } from '../../constants';
-import { Component, OnInit, Input } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-square',
-  templateUrl: './square.component.html',
-  styleUrls: ['./square.component.scss']
+  selector: 'app-field',
+  templateUrl: './field.component.html',
+  styleUrls: ['./field.component.scss']
 })
-export class SquareComponent {
+export class FieldComponent {
   @Input() darkerTile: boolean;
   @Input() isValidMove: boolean;
   @Input() isCheckMove: boolean;

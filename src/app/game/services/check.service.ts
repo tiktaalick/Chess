@@ -4,7 +4,7 @@ import { RulesService } from './rules.service';
 import { Injectable } from '@angular/core';
 import { ChessPiece, Coordinates } from '../interfaces';
 import { BehaviorSubject } from 'rxjs';
-import { GameService } from './game.service';
+import { ChessBoardService } from './chess-board.service';
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +13,7 @@ export class CheckService {
   public checkMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
   public resetCheckMove$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(null);
 
-  constructor(private game: GameService, private rules: RulesService) { }
+  constructor(private chessBoard: ChessBoardService, private rules: RulesService) { }
 
   public handleCheck(isBlack: boolean, chessBoard: ChessBoard): ChessPiece {
     console.log('handleCheck: ' + chessBoard.turnPhase);
@@ -56,7 +56,7 @@ export class CheckService {
   }
 
   public doIPutMyselfInCheck(chessBoard: ChessBoard, movingChessPiece: ChessPiece) {
-    chessBoard = this.game.cloneChessBoard(chessBoard,TurnPhase.PLAYER_CHECK);
+    chessBoard = this.chessBoard.cloneChessBoard(chessBoard,TurnPhase.PLAYER_CHECK);
     
     let localMovingChessPiece = chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id);    
  
@@ -72,7 +72,7 @@ export class CheckService {
   
   public showCheckMove(coordinates: Coordinates) {
     console.log('showCheckMove: ('+coordinates.x+','+coordinates.y+')');
-    this.checkMove$.next(this.game.field(coordinates.x,coordinates.y));
+    this.checkMove$.next(this.chessBoard.field(coordinates.x,coordinates.y));
   }
 
   public resetCheckMove() {

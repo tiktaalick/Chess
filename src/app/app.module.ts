@@ -1,8 +1,8 @@
 import { AppComponent } from './app.component';
 import { GameComponent } from './game/game.component';
-import { BoardComponent } from './game/board/board.component';
-import { SquareComponent } from './game/board/square/square.component';
+import { FieldComponent } from './game/chess-board/field/field.component';
 import { ChessPieceComponent } from './game/chess-piece/chess-piece.component';
+import { ChessBoardComponent } from './game/chess-board/chess-board.component';
 
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
@@ -12,8 +12,8 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
   declarations: [
     AppComponent,
     ChessPieceComponent,
-    SquareComponent,
-    BoardComponent,
+    FieldComponent,
+    ChessBoardComponent,
     GameComponent
   ],
   imports: [

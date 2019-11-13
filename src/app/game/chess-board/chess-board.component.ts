@@ -1,28 +1,28 @@
-import { TurnPhase, ChessPieceType } from './../constants';
-import { ChessBoard, Coordinates } from './../interfaces';
-import { MoveService } from './../services/move.service';
+import { TurnPhase } from '../constants';
+import { ChessBoard } from '../interfaces';
 import { GameService } from '../services/game.service';
+import { ChessBoardService } from '../services/chess-board.service';
 import { Component, OnDestroy } from '@angular/core';
 import { Field, ChessPiece } from '../interfaces';
 import * as _ from 'lodash';
 import { CdkDragEnd, CdkDragMove } from '@angular/cdk/drag-drop';
 
 @Component({
-  selector: 'app-board',
-  templateUrl: './board.component.html',
-  styleUrls: ['./board.component.scss']
+  selector: 'app-chess-board',
+  templateUrl: './chess-board.component.html',
+  styleUrls: ['./chess-board.component.scss']
 })
-export class BoardComponent implements OnDestroy{
-  private validMove$ = this.move.validMove$;
-  private resetValidMove$ = this.move.resetValidMove$;
-  private checkMove$ = this.move.checkMove$;
-  private resetCheckMove$ = this.move.resetCheckMove$;
-  private playerHasLost$ = this.move.playerHasLost$;  
+export class ChessBoardComponent implements OnDestroy{
+  private validMove$ = this.game.validMove$;
+  private resetValidMove$ = this.game.resetValidMove$;
+  private checkMove$ = this.game.checkMove$;
+  private resetCheckMove$ = this.game.resetCheckMove$;
+  private playerHasLost$ = this.game.playerHasLost$;  
   public fields: Field[] = this.createFieldArray();
   
   constructor(
-    private game: GameService, 
-    private move: MoveService) { 
+    private chessBoard: ChessBoardService, 
+    private game: GameService) { 
     this.validMove$.subscribe(move => {
       if(this.fields[move]) {
         this.fields[move].isValidMove = true;
@@ -37,7 +37,7 @@ export class BoardComponent implements OnDestroy{
 
     this.checkMove$.subscribe(move => {
       this.fields.forEach(field => {
-        if(field.isCheckMove && !this.game.getChessPiece(this.game.chessBoard, field.number)) {
+        if(field.isCheckMove && !this.chessBoard.getChessPiece(this.chessBoard.chessBoard, field.number)) {
           field.isCheckMove = false;
         }
       });
@@ -80,56 +80,56 @@ export class BoardComponent implements OnDestroy{
   }
 
   public getX(field: number): number {
-    return this.game.coordinates(field).x;
+    return this.chessBoard.coordinates(field).x;
   }
   
   public getY(field: number): number {
-    return this.game.coordinates(field).y;
+    return this.chessBoard.coordinates(field).y;
   }
 
   public isDarkerTile(field: number): boolean {
-    return (this.game.coordinates(field).x + this.game.coordinates(field).y) % 2 === 1;
+    return (this.chessBoard.coordinates(field).x + this.chessBoard.coordinates(field).y) % 2 === 1;
   }
 
   public hasAChessPiece(field: number): boolean {
-    return this.game.getChessPiece(this.game.chessBoard, field) ? true : false;
+    return this.chessBoard.getChessPiece(this.chessBoard.chessBoard, field) ? true : false;
   }
 
   public getChessPiece(field: number): ChessPiece {
-    return this.game.getChessPiece(this.game.chessBoard, field);
+    return this.chessBoard.getChessPiece(this.chessBoard.chessBoard, field);
   }
 
   public isDragDisabled(field: number) {
-    const chessPiece: ChessPiece = this.game.getChessPiece(this.game.chessBoard, field);
+    const chessPiece: ChessPiece = this.chessBoard.getChessPiece(this.chessBoard.chessBoard, field);
 
     return chessPiece && chessPiece.myTurn ? false : true;
   }
 
   public isChessPieceBlack(field: number) {
-    const chessPiece: ChessPiece = this.game.getChessPiece(this.game.chessBoard, field);
+    const chessPiece: ChessPiece = this.chessBoard.getChessPiece(this.chessBoard.chessBoard, field);
 
     return chessPiece && chessPiece.isBlack ? true : false;
   }
 
   public onDragMoved(event: CdkDragMove, field: number) {
-    let chessBoard: ChessBoard = this.game.cloneChessBoard(this.game.chessBoard, TurnPhase.PLAYER_DRAG);
-    const movingChessPiece: ChessPiece = this.move.checkTheRulesForActivePlayer(chessBoard, event, field, true, false);
+    let chessBoard: ChessBoard = this.chessBoard.cloneChessBoard(this.chessBoard.chessBoard, TurnPhase.PLAYER_DRAG);
+    const movingChessPiece: ChessPiece = this.game.checkTheRulesForActivePlayer(chessBoard, event, field, true, false);
 
     if(movingChessPiece) {
-      this.move.showValidMove(movingChessPiece.to);
+      this.game.showValidMove(movingChessPiece.to);
     }  
 
   }
 
   public onDragEnded(event: CdkDragEnd, field: number) {
-    let chessBoard: ChessBoard = this.game.cloneChessBoard(this.game.chessBoard, TurnPhase.PLAYER_DRAG_ENDED);
-    const movingChessPiece: ChessPiece = this.move.checkTheRulesForActivePlayer(chessBoard, event, field, false, false);
+    let chessBoard: ChessBoard = this.chessBoard.cloneChessBoard(this.chessBoard.chessBoard, TurnPhase.PLAYER_DRAG_ENDED);
+    const movingChessPiece: ChessPiece = this.game.checkTheRulesForActivePlayer(chessBoard, event, field, false, false);
     
     if(movingChessPiece) {
-      this.move.moveChessPiece(chessBoard,movingChessPiece);      
+      this.game.moveChessPiece(chessBoard,movingChessPiece);      
     } else {
       console.log('Setting dragging distance to zero')
-      this.move.checkTheRulesForActivePlayer(chessBoard, event, field, false, true);
+      this.game.checkTheRulesForActivePlayer(chessBoard, event, field, false, true);
     }
 
     event.source.reset();

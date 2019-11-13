@@ -1,5 +1,5 @@
 import { ChessPiece, ChessBoard } from './../interfaces';
-import { GameService } from './game.service';
+import { ChessBoardService } from './chess-board.service';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { ChessPieceType, CastlingStatus } from '../constants';
@@ -9,35 +9,7 @@ import { ChessPieceType, CastlingStatus } from '../constants';
 })
 export class CastlingService {
 
-  constructor(private game: GameService) { }
-
-  private castleRook(chessBoard: ChessBoard, king: ChessPiece, castleLeft: boolean): ChessPiece {
-    console.log('castleRook: ' + chessBoard.turnPhase);
-
-    let rookToCastle: ChessPiece = chessBoard.chessPieces.find(
-      chessPiece => chessPiece.type === ChessPieceType.ROOK && 
-                    chessPiece.isBlack === king.isBlack &&
-                    (castleLeft 
-                      ? chessPiece.castlingLeftStatus === CastlingStatus.ALLOWED 
-                      : chessPiece.castlingRightStatus === CastlingStatus.ALLOWED));      
-    rookToCastle.to.x = castleLeft ? rookToCastle.from.x + 3 : rookToCastle.from.x - 2;
-    return rookToCastle;
-  }
-
-  private dontCastleKing(chessBoard: ChessBoard, rookToCastle: ChessPiece, castleLeft: boolean): ChessPiece {
-    console.log('dontCastleKing: ' + chessBoard.turnPhase);
-
-    const king: ChessPiece = chessBoard.chessPieces.find(
-    chessPiece => chessPiece.type === ChessPieceType.KING && 
-                    chessPiece.isBlack === rookToCastle.isBlack); 
-    king.castlingLeftStatus = castleLeft 
-                  ? CastlingStatus.NOT_ALLOWED 
-                  : king.castlingLeftStatus;
-    king.castlingRightStatus = castleLeft 
-                  ? king.castlingRightStatus 
-                  : CastlingStatus.NOT_ALLOWED;
-    return king;
-  }
+  constructor(private chessBoard: ChessBoardService) { }
 
   public handleCastling(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessPiece[] {
     console.log('handleCastling: ' + chessBoard.turnPhase);
@@ -72,4 +44,33 @@ export class CastlingService {
     
     return kingAndRook;
   }
+
+  private castleRook(chessBoard: ChessBoard, king: ChessPiece, castleLeft: boolean): ChessPiece {
+    console.log('castleRook: ' + chessBoard.turnPhase);
+
+    let rookToCastle: ChessPiece = chessBoard.chessPieces.find(
+      chessPiece => chessPiece.type === ChessPieceType.ROOK && 
+                    chessPiece.isBlack === king.isBlack &&
+                    (castleLeft 
+                      ? chessPiece.castlingLeftStatus === CastlingStatus.ALLOWED 
+                      : chessPiece.castlingRightStatus === CastlingStatus.ALLOWED));      
+    rookToCastle.to.x = castleLeft ? rookToCastle.from.x + 3 : rookToCastle.from.x - 2;
+    return rookToCastle;
+  }
+
+  private dontCastleKing(chessBoard: ChessBoard, rookToCastle: ChessPiece, castleLeft: boolean): ChessPiece {
+    console.log('dontCastleKing: ' + chessBoard.turnPhase);
+
+    const king: ChessPiece = chessBoard.chessPieces.find(
+    chessPiece => chessPiece.type === ChessPieceType.KING && 
+                    chessPiece.isBlack === rookToCastle.isBlack); 
+    king.castlingLeftStatus = castleLeft 
+                  ? CastlingStatus.NOT_ALLOWED 
+                  : king.castlingLeftStatus;
+    king.castlingRightStatus = castleLeft 
+                  ? king.castlingRightStatus 
+                  : CastlingStatus.NOT_ALLOWED;
+    return king;
+  }
+
 }

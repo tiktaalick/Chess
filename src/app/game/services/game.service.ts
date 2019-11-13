@@ -1,118 +1,145 @@
-import { ChessPiece, ChessBoard, Coordinates } from '../interfaces';
-import { ChessPieceType, EnPassantStatus, CastlingStatus, TurnPhase } from './../constants';
-import { Injectable, OnDestroy } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
+import { TurnPhase } from '../constants';
+import { ChessBoard, ChessPiece, Coordinates } from '../interfaces';
+import { RulesService } from './rules.service';
+import { CheckService } from './check.service';
+import { PromotePawnService } from './promote-pawn.service';
 import * as _ from 'lodash';
+import { Injectable, OnDestroy } from '@angular/core';
+import { ChessBoardService } from './chess-board.service';
+import { BehaviorSubject } from 'rxjs';
+import { CastlingService } from './castling.service';
+import { NoMoreMovesService } from './no-more-moves.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class GameService implements OnDestroy {
-  public chessBoard$: BehaviorSubject<ChessBoard> = this.initializeChessBoard$();
-  public chessBoard: ChessBoard;
-  public coordinates(i: number): Coordinates {
-    return {
-      x: i % 8,
-      y: Math.floor(i / 8)
-    }
-  }
-  public field(x: number, y: number): number {
-    return x + 8 * y;
-  }
-  
-  constructor() {
-    this.chessBoard$.subscribe(chessPieces => {
-      this.chessBoard = chessPieces;
-    })
+  public validMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
+  public resetValidMove$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
+  public checkMove$ = this.check.checkMove$;
+  public resetCheckMove$ = this.check.resetCheckMove$;
+  public playerHasLost$ = this.noMoreMoves.playerHasLost$;
+  public isBlackMove$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  private dragPosition: Coordinates = this.resetDragPosition();
 
+  constructor(
+    private chessBoard: ChessBoardService, 
+    private castling: CastlingService, 
+    private promote: PromotePawnService,
+    private check: CheckService,
+    private noMoreMoves: NoMoreMovesService,
+    private rules: RulesService) { 
+    this.isBlackMove$.subscribe(isBlackMove => {
+      this.chessBoard.chessBoard.chessPieces.forEach(movingChessPiece => {
+        movingChessPiece.myTurn = movingChessPiece.isBlack === isBlackMove;
+      })
+    })
   }
 
   ngOnDestroy(): void {
-    this.chessBoard$.unsubscribe();
+    this.isBlackMove$.unsubscribe();
   }
 
-  public getChessPiece(chessBoard: ChessBoard, field: number): ChessPiece {
-    const fieldX = this.coordinates(field).x;
-    const fieldY = this.coordinates(field).y;
+  private hasMovedToAnotherField(dragPosition: Coordinates, newPosition: Coordinates): boolean {
+    if(dragPosition.x == -1 && dragPosition.y == -1) {
+      this.dragPosition.x = newPosition.x;
+      this.dragPosition.y = newPosition.y;
+      dragPosition = this.dragPosition;
+    }
 
-    return chessBoard.chessPieces.find(
-      chessPiece => chessPiece.from.x === fieldX && chessPiece.from.y === fieldY);    
+    return !(newPosition.x === dragPosition.x && newPosition.y === dragPosition.y);
   }
 
-  private initializeChessBoard$(): BehaviorSubject<ChessBoard> {
-    let chessBoard: ChessBoard = {
-      turnPhase: TurnPhase.PLAYER_SWITCH,
-      chessPieces: []
-    };    
+  public moveChessPiece(chessBoard: ChessBoard, movingChessPiece: ChessPiece) { 
+    chessBoard.turnPhase =TurnPhase.PLAYER_MOVE; 
+
+    chessBoard = this.rules.handleEnPassant(chessBoard, movingChessPiece);
     
-    chessBoard.chessPieces.push(this.createChessPiece(1, ChessPieceType.ROOK, true, {x: 0, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(2, ChessPieceType.KNIGHT, true, {x: 1, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(3, ChessPieceType.BISHOP, true, {x: 2, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(4, ChessPieceType.QUEEN, true, {x: 3, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(5, ChessPieceType.KING, true, {x: 4, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(6, ChessPieceType.BISHOP, true, {x: 5, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(7, ChessPieceType.KNIGHT, true, {x: 6, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(8, ChessPieceType.ROOK, true, {x: 7, y: 0}));
-    chessBoard.chessPieces.push(this.createChessPiece(9, ChessPieceType.PAWN, true, {x: 0, y: 1}));
-    chessBoard.chessPieces.push(this.createChessPiece(10, ChessPieceType.PAWN, true, {x: 1, y: 1}));
-    chessBoard.chessPieces.push(this.createChessPiece(11, ChessPieceType.PAWN, true, {x: 2, y: 1}));
-    chessBoard.chessPieces.push(this.createChessPiece(12, ChessPieceType.PAWN, true, {x: 3, y: 1}));
-    chessBoard.chessPieces.push(this.createChessPiece(13, ChessPieceType.PAWN, true, {x: 4, y: 1}));
-    chessBoard.chessPieces.push(this.createChessPiece(14, ChessPieceType.PAWN, true, {x: 5, y: 1}));
-    chessBoard.chessPieces.push(this.createChessPiece(15, ChessPieceType.PAWN, true, {x: 6, y: 1}));
-    chessBoard.chessPieces.push(this.createChessPiece(16, ChessPieceType.PAWN, true, {x: 7, y: 1}));
+    // Handle castling
+    const kingAndRook: ChessPiece[] = this.castling.handleCastling(chessBoard, movingChessPiece);
+    movingChessPiece = kingAndRook[0];
+    let index = chessBoard.chessPieces.indexOf(kingAndRook[1]);
+    if (index > -1) {
+      chessBoard.chessPieces[index] = kingAndRook[1];
+    }
+    index = chessBoard.chessPieces.indexOf(kingAndRook[2]);
+    if (index > -1) {
+      chessBoard.chessPieces[index] = kingAndRook[2];
+      chessBoard.chessPieces[index].from.x = chessBoard.chessPieces[index].to.x;
+      chessBoard.chessPieces[index].from.y = chessBoard.chessPieces[index].to.y;
+    }
     
-    chessBoard.chessPieces.push(this.createChessPiece(17, ChessPieceType.ROOK, false, {x: 0, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(18, ChessPieceType.KNIGHT, false, {x: 1, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(19, ChessPieceType.BISHOP, false, {x: 2, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(20, ChessPieceType.QUEEN, false, {x: 3, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(21, ChessPieceType.KING, false, {x: 4, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(22, ChessPieceType.BISHOP, false, {x: 5, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(23, ChessPieceType.KNIGHT, false, {x: 6, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(24, ChessPieceType.ROOK, false, {x: 7, y: 7}));
-    chessBoard.chessPieces.push(this.createChessPiece(25, ChessPieceType.PAWN, false, {x: 0, y: 6}));
-    chessBoard.chessPieces.push(this.createChessPiece(26, ChessPieceType.PAWN, false, {x: 1, y: 6}));
-    chessBoard.chessPieces.push(this.createChessPiece(27, ChessPieceType.PAWN, false, {x: 2, y: 6}));
-    chessBoard.chessPieces.push(this.createChessPiece(28, ChessPieceType.PAWN, false, {x: 3, y: 6}));
-    chessBoard.chessPieces.push(this.createChessPiece(29, ChessPieceType.PAWN, false, {x: 4, y: 6}));
-    chessBoard.chessPieces.push(this.createChessPiece(30, ChessPieceType.PAWN, false, {x: 5, y: 6}));
-    chessBoard.chessPieces.push(this.createChessPiece(31, ChessPieceType.PAWN, false, {x: 6, y: 6}));
-    chessBoard.chessPieces.push(this.createChessPiece(32, ChessPieceType.PAWN, false, {x: 7, y: 6}));
+    movingChessPiece = this.promote.promotePawn(movingChessPiece);
 
-    return new BehaviorSubject<ChessBoard>(chessBoard);
-  }
-
-  private createChessPiece(id: number, type: string, isBlack: boolean, coordinates): ChessPiece {
-    const castlingLeftAllowed: boolean = (type === ChessPieceType.KING) || (type === ChessPieceType.ROOK && coordinates.x === 0);
-    const castlingRightAllowed: boolean = (type === ChessPieceType.KING) || (type === ChessPieceType.ROOK && coordinates.x === 7);
+    const to: number = this.chessBoard.field(movingChessPiece.to.x,movingChessPiece.to.y);
     
-    const chessPiece: ChessPiece = {
-      id: id,
-      type: type,
-      isBlack: isBlack,
-      isUnderAttack: false,
-      from: {x: coordinates.x, y: coordinates.y},
-      to: {x: coordinates.x, y: coordinates.y},
-      myTurn: false,
-      enPassantStatus: EnPassantStatus.NOT_ALLOWED,
-      castlingLeftStatus: castlingLeftAllowed ? CastlingStatus.ALLOWED : CastlingStatus.NOT_ALLOWED,
-      castlingRightStatus: castlingRightAllowed ? CastlingStatus.ALLOWED : CastlingStatus.NOT_ALLOWED
-    }; 
+    chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id).from.x = movingChessPiece.to.x;
+    chessBoard.chessPieces.find(chessPiece => chessPiece.id === movingChessPiece.id).from.y = movingChessPiece.to.y;
 
-    return chessPiece;
+    this.chessBoard.chessBoard$.next(chessBoard);
+
+    chessBoard.chessPieces.forEach(chessPiece => chessPiece.isUnderAttack = false);
+    
+    this.noMoreMoves.handleNoMoreMoves(chessBoard, !movingChessPiece.isBlack);
+
+    chessBoard = this.chessBoard.cloneChessBoard(chessBoard, TurnPhase.OTHER_CHECK);
+    let checkPiece: ChessPiece = this.check.handleCheck(!movingChessPiece.isBlack, chessBoard);
+    chessBoard.turnPhase = TurnPhase.PLAYER_SWITCH;
+
+    if (!checkPiece) {
+      this.check.resetCheckMove();
+    }
+    this.resetValidMove(this.dragPosition);
+    this.dragPosition = this.resetDragPosition();
+    this.isBlackMove$.next(!this.isBlackMove$.getValue());
   }
 
-  public hasAChessPieceOfType(chessBoard: ChessBoard, field: number, type: string): boolean {
-    const chessPiece: ChessPiece = this.getChessPiece(chessBoard, field);
+  private doPerformChecks(movingChessPiece: ChessPiece, whileDragging: boolean): boolean {
+    const hasMovedToAnotherField: boolean = this.hasMovedToAnotherField(this.dragPosition, movingChessPiece.to);
 
-    return chessPiece && chessPiece.type === type ? true : false;
+    if (whileDragging && hasMovedToAnotherField) {
+      this.resetValidMove(this.dragPosition);
+      this.dragPosition = { x: movingChessPiece.to.x, y: movingChessPiece.to.y };
+      return true;
+    } 
+    
+    if (!whileDragging) {
+      return true;
+    } else {
+      this.dragPosition = { x: movingChessPiece.to.x, y: movingChessPiece.to.y };
+    }
+    
+    return false;
   }
 
-  public cloneChessBoard(chessBoard: ChessBoard, turnPhase: string): ChessBoard {
-    chessBoard = _.cloneDeep(chessBoard);
-    chessBoard.turnPhase = turnPhase; 
+  public checkTheRulesForActivePlayer(chessBoard: ChessBoard, event: any, field: number, whileDragging: boolean, resetDragging: boolean): ChessPiece {
+    const movingChessPiece: ChessPiece = this.chessBoard.getChessPiece(chessBoard, field);
+    if (resetDragging) {
+      movingChessPiece.to.x = movingChessPiece.from.x;
+      movingChessPiece.to.y = movingChessPiece.from.y;
+    } else {
+      movingChessPiece.to.x = this.chessBoard.getNewPosition(event).x;
+      movingChessPiece.to.y = this.chessBoard.getNewPosition(event).y;
+    }
 
-    return chessBoard;
+    const doPerformChecks: boolean = this.doPerformChecks(movingChessPiece, whileDragging); 
+
+    if (doPerformChecks) {
+      return this.check.checkTheRules(chessBoard, movingChessPiece);
+    }
+    
+    return null;
+  }
+  
+  public showValidMove(coordinates: Coordinates) {
+    this.validMove$.next(this.chessBoard.field(coordinates.x,coordinates.y));
   }
 
+  private resetValidMove(coordinates: Coordinates) {
+    this.resetValidMove$.next(this.chessBoard.field(coordinates.x,coordinates.y));
+  }
+
+  private resetDragPosition(): Coordinates {
+    return {x: -1, y: -1};
+  }
 }

@@ -2,7 +2,7 @@ import { ChessPieceType } from './../constants';
 import { ChessBoard, ChessPiece, Coordinates } from '../interfaces';
 import { CheckService } from './check.service';
 import { RulesService } from './rules.service';
-import { GameService } from './game.service';
+import { ChessBoardService } from './chess-board.service';
 import { Injectable } from '@angular/core';
 import { TurnPhase } from '../constants';
 import { BehaviorSubject } from 'rxjs';
@@ -13,10 +13,10 @@ import { BehaviorSubject } from 'rxjs';
 export class NoMoreMovesService {
   public playerHasLost$: BehaviorSubject<number> = new BehaviorSubject<number>(null);
 
-  constructor(private game: GameService, private rules: RulesService, private check: CheckService) { }
+  constructor(private chessBoard: ChessBoardService, private rules: RulesService, private check: CheckService) { }
 
   public async handleNoMoreMoves(chessBoard: ChessBoard, isBlack: boolean): Promise<void> {
-    chessBoard = this.game.cloneChessBoard(chessBoard,TurnPhase.OTHER_MOVES);
+    chessBoard = this.chessBoard.cloneChessBoard(chessBoard,TurnPhase.OTHER_MOVES);
 
     console.log('handleNoMoreMoves: ' + chessBoard.turnPhase);
     console.log('isBlack: ' + isBlack);
@@ -28,13 +28,13 @@ export class NoMoreMovesService {
       let chessPiece: ChessPiece = chessBoard.chessPieces[cp];
       if (chessPiece.isBlack === isBlack) {
         for (let f = 0; f < 64; f++) {
-          const chessBoardBackup = this.game.cloneChessBoard(chessBoard,TurnPhase.OTHER_MOVES);
+          const chessBoardBackup = this.chessBoard.cloneChessBoard(chessBoard,TurnPhase.OTHER_MOVES);
           const oldFromX = chessPiece.from.x;
           const oldFromY = chessPiece.from.y;
           const oldToX = chessPiece.to.x;
           const oldToY = chessPiece.to.y;
-          chessPiece.to.x = this.game.coordinates(f).x;
-          chessPiece.to.y = this.game.coordinates(f).y;
+          chessPiece.to.x = this.chessBoard.coordinates(f).x;
+          chessPiece.to.y = this.chessBoard.coordinates(f).y;
           const correctMovingChessPiece = this.check.checkTheRules(chessBoard,chessPiece);
           chessPiece.from.x = oldFromX;
           chessPiece.from.y = oldFromY;
@@ -42,7 +42,7 @@ export class NoMoreMovesService {
           chessPiece.to.y = oldToY;
           chessBoard = chessBoardBackup;
           if (correctMovingChessPiece) {
-            console.log('Valid move: '+chessPiece.type+' ('+chessPiece.from.x+','+chessPiece.from.y+') => ('+this.game.coordinates(f).x+','+this.game.coordinates(f).y+')');
+            console.log('Valid move: '+chessPiece.type+' ('+chessPiece.from.x+','+chessPiece.from.y+') => ('+this.chessBoard.coordinates(f).x+','+this.chessBoard.coordinates(f).y+')');
             isValidMoveFound = true; 
             break validmoves;
           }
@@ -59,7 +59,7 @@ export class NoMoreMovesService {
 
     private showPlayerHasLost(coordinates: Coordinates) {
     console.log('showCheckMove: ('+coordinates.x+','+coordinates.y+')');
-    this.playerHasLost$.next(this.game.field(coordinates.x,coordinates.y));
+    this.playerHasLost$.next(this.chessBoard.field(coordinates.x,coordinates.y));
   }
 
 

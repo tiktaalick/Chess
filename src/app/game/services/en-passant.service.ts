@@ -1,7 +1,7 @@
 import { TurnPhase } from './../constants';
 import { ChessBoard } from './../interfaces';
 import { ChessPiece } from '../interfaces';
-import { GameService } from './game.service';
+import { ChessBoardService } from './chess-board.service';
 import { Injectable } from '@angular/core';
 import * as _ from 'lodash';
 import { EnPassantStatus, ChessPieceType } from '../constants';
@@ -11,7 +11,7 @@ import { EnPassantStatus, ChessPieceType } from '../constants';
 })
 export class EnPassantService {
 
-  constructor(private game: GameService) { }
+  constructor(private chessBoard: ChessBoardService) { }
 
   public handleEnPassant(chessBoard: ChessBoard, movingChessPiece: ChessPiece): ChessBoard {
     console.log('handleEnPassant: ' + chessBoard.turnPhase);
@@ -39,7 +39,7 @@ export class EnPassantService {
   }
 
   public canIKickSomeoneOffTheBoardEnPassant(chessBoard: ChessBoard, pawn:ChessPiece, horizontal: number, vertical: number): ChessPiece {
-    const chessPieceToBeRemovedEnPassant = this.game.getChessPiece(chessBoard, this.game.field(pawn.to.x,pawn.to.y-Math.sign(vertical)));
+    const chessPieceToBeRemovedEnPassant = this.chessBoard.getChessPiece(chessBoard, this.chessBoard.field(pawn.to.x,pawn.to.y-Math.sign(vertical)));
 
     if (chessPieceToBeRemovedEnPassant && 
       chessPieceToBeRemovedEnPassant.enPassantStatus !== EnPassantStatus.NOT_ALLOWED && 

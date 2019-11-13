@@ -1,6 +1,6 @@
-<div class="board">
+<div class="chess-board">
     <div *ngFor="let field of fields">
-        <app-square [field]="field.number" [x]="getX(field.number)" [y]="getY(field.number)"
+        <app-field [field]="field.number" [x]="getX(field.number)" [y]="getY(field.number)"
             [darkerTile]="isDarkerTile(field.number)" [isValidMove]="field.isValidMove"
             [isCheckMove]="field.isCheckMove" [playerHasLost]="field.playerHasLost">
             <div cdkDrag [cdkDragDisabled]="isDragDisabled(field.number)"
@@ -9,6 +9,6 @@
                     [chessPiece]=getChessPiece(field.number)>
                 </app-chess-piece>
             </div>
-        </app-square>
+        </app-field>
     </div>
 </div>
